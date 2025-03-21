@@ -1,0 +1,35 @@
+package com.genysyxtechnologies.service_request_system.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+@Entity
+@Table(name = "services")
+@Data
+public class ServiceOffering {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    /**
+     * JSON string defining the structure of custom fields required for requests of this service.
+     * Example: {"issueType": "dropdown", "description": "text"}
+     */
+    @Column(name = "field_schema", columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    private String fieldSchema; // JSON string for custom fields
+
+    @Column(name = "is_active")
+    private boolean isActive = true;
+}

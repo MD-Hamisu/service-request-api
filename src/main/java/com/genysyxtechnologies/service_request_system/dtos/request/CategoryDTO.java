@@ -1,4 +1,4 @@
-package com.genysyxtechnologies.service_request_system.dtos;
+package com.genysyxtechnologies.service_request_system.dtos.request;
 
 import lombok.Data;
 

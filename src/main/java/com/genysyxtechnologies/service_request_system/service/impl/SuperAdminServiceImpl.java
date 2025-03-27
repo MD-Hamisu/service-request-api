@@ -1,4 +1,4 @@
-package com.genysyxtechnologies.service_request_system.service.util;
+package com.genysyxtechnologies.service_request_system.service.impl;
 
 import com.genysyxtechnologies.service_request_system.constant.Role;
 import com.genysyxtechnologies.service_request_system.dtos.request.UserDTO;

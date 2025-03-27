@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +18,18 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private static final String SECRET_KEY = "7367566B5970437336763979FF423F4528482B4D6251655468576D5A71347437";
+    @Value("${jwt.secret:defaultSecretKey12345678901234567890}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration:86400000}") // 24 hours in milliseconds
+    private long jwtExpiration;
+
+    private Key secretKey;
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -34,7 +47,7 @@ public class JwtUtil {
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
-                .setSigningKey(getSignKey())
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -50,18 +63,16 @@ public class JwtUtil {
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 hours
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .setExpiration(expiryDate)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    private Key getSignKey() {
-        byte[] keyBytes= Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {

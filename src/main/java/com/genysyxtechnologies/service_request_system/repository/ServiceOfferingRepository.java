@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering, Long> {
+    // Service Query for Requesters
     @Query("SELECT so FROM ServiceOffering so " +
             "WHERE so.isActive = true " +
             "AND (:name IS NULL OR LOWER(so.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
@@ -18,6 +19,7 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
             Pageable pageable
     );
 
+    // Service Query For Managers
     @Query("SELECT so FROM ServiceOffering so " +
             "WHERE (:name IS NULL OR LOWER(so.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND (:categoryId IS NULL OR so.category.id = :categoryId) " +

@@ -11,10 +11,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, Long> {
-    List<ServiceRequest> findAllByUser_Id(Long userId);
-    List<ServiceRequest> findAllByUserIdAndStatus(Long user_id, ServiceRequestStatus status);
-    List<ServiceRequest> findAllByStatus(ServiceRequestStatus status);
-
     @Query("SELECT sr FROM ServiceRequest sr " +
             "WHERE sr.user.id = :userId " +
             "AND (:status IS NULL OR sr.status = :status) " +

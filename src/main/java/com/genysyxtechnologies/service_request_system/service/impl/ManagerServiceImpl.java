@@ -192,14 +192,14 @@ public class ManagerServiceImpl implements ManagerService {
 
     // Mapping Method
     private void mapToServiceOfferingEntity(ServiceOfferingDTO dto, ServiceOffering serviceOffering) {
-        serviceOffering.setName(dto.getName());
-        serviceOffering.setDescription(dto.getDescription());
-        if (dto.getCategoryId() != null) {
-            Category category = categoryRepository.findById(dto.getCategoryId())
+        serviceOffering.setName(dto.name());
+        serviceOffering.setDescription(dto.description());
+        if (dto.categoryId() != null) {
+            Category category = categoryRepository.findById(dto.categoryId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
             serviceOffering.setCategory(category);
         }
-        serviceOffering.setFieldSchema(dto.getFields());
+        serviceOffering.setFieldSchema(dto.fields());
         serviceOffering.setActive(dto.isActive());
     }
 }

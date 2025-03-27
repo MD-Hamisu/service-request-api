@@ -8,15 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-
 public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, Long> {
     @Query("SELECT sr FROM ServiceRequest sr " +
             "WHERE sr.user.id = :userId " +
             "AND (:status IS NULL OR sr.status = :status) " +
-            "AND (:search IS NULL OR " +
-            "LOWER(sr.service.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(sr.submittedData) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND (:search IS NULL OR sr.service.name LIKE CONCAT('%', :search, '%'))" +
             "ORDER BY sr.submissionDate DESC")
     Page<ServiceRequest> findByUserIdWithFilters(
             @Param("userId") Long userId,
@@ -27,12 +23,8 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
 
     long countByStatus(ServiceRequestStatus serviceRequestStatus);
 
-    @Query("SELECT sr FROM ServiceRequest sr " +
-            "WHERE (:status IS NULL OR sr.status = :status) " +
-            "AND (:search IS NULL OR " +
-            "LOWER(sr.service.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(sr.submittedData) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-            "ORDER BY sr.submissionDate DESC")
+    @Query("SELECT sr FROM ServiceRequest sr WHERE (:status IS NULL OR sr.status = :status) AND " +
+            "(:search IS NULL OR sr.user.username LIKE CONCAT('%', :search, '%'))")
     Page<ServiceRequest> findRequestsWithFilters(
             @Param("status") ServiceRequestStatus status,
             @Param("search") String search,

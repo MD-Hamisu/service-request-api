@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class AppConfiguration {
     private final UserRepository userRepository;
-    private final UserDetailsService userDetailsService;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -31,7 +30,7 @@ public class AppConfiguration {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider() {
+    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(new BCryptPasswordEncoder());
         provider.setUserDetailsService(userDetailsService);

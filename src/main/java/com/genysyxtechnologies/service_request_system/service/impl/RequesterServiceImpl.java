@@ -13,6 +13,7 @@ import com.genysyxtechnologies.service_request_system.model.User;
 import com.genysyxtechnologies.service_request_system.repository.CategoryRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
+import com.genysyxtechnologies.service_request_system.service.EmailService;
 import com.genysyxtechnologies.service_request_system.service.RequesterService;
 import com.genysyxtechnologies.service_request_system.service.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class RequesterServiceImpl implements RequesterService {
     private final SecurityUtil securityUtil;
     private final ObjectMapper jacksonObjectMapper;
     private final CategoryRepository categoryRepository;
+    private final EmailService emailService;
 
     @Override
     public Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Pageable pageable) {
@@ -49,7 +51,8 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
-                service.getFieldSchema()
+                service.getFieldSchema(),
+                service.isActive()
         ));
     }
 
@@ -83,7 +86,8 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
-                service.getFieldSchema()
+                service.getFieldSchema(),
+                service.isActive()
         );
     }
 
@@ -109,7 +113,7 @@ public class RequesterServiceImpl implements RequesterService {
             File file = new File("uploads/" + fileName); // Ensure "uploads" directory exists
             try {
                 attachment.transferTo(file);
-                attachmentUrl = "/uploads/" + fileName; // Adjust for production (e.g., S3)
+                attachmentUrl = "/uploads/" + fileName;
             } catch (IOException e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to upload attachment");
             }
@@ -124,6 +128,9 @@ public class RequesterServiceImpl implements RequesterService {
         request.setSubmittedData(requestData);
         request.setAttachmentUrl(attachmentUrl);
         serviceRequestRepository.save(request);
+
+        // Send email notification to the Requester
+        emailService.sendRequestSubmissionEmail(user, request);
 
         return "Request submitted successfully";
     }
@@ -163,6 +170,7 @@ public class RequesterServiceImpl implements RequesterService {
         return requests.map(request -> new ServiceRequestResponse(
                 request.getId(),
                 request.getService().getName(),
+                request.getUser().getFullName(),
                 request.getSubmissionDate().toString(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),

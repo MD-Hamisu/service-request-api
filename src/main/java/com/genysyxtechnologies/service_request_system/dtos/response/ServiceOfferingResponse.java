@@ -5,5 +5,6 @@ public record ServiceOfferingResponse(
         String name,
         String description,
         String categoryName,
-        String formTemplate
+        String formTemplate,
+        boolean isActive
 ) {}

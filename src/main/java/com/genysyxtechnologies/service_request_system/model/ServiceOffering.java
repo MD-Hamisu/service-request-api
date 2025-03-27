@@ -2,8 +2,12 @@ package com.genysyxtechnologies.service_request_system.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "services")
@@ -32,4 +36,11 @@ public class ServiceOffering {
 
     @Column(name = "is_active")
     private boolean isActive = true;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime created;
+
+    @UpdateTimestamp
+    private LocalDateTime modified;
 }

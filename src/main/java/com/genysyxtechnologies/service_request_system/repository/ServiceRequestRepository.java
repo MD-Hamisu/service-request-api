@@ -28,4 +28,18 @@ public interface ServiceRequestRepository extends JpaRepository<ServiceRequest, 
             @Param("search") String search,
             Pageable pageable
     );
+
+    long countByStatus(ServiceRequestStatus serviceRequestStatus);
+
+    @Query("SELECT sr FROM ServiceRequest sr " +
+            "WHERE (:status IS NULL OR sr.status = :status) " +
+            "AND (:search IS NULL OR " +
+            "LOWER(sr.service.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(sr.submittedData) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "ORDER BY sr.submissionDate DESC")
+    Page<ServiceRequest> findRequestsWithFilters(
+            @Param("status") ServiceRequestStatus status,
+            @Param("search") String search,
+            Pageable pageable
+    );
 }

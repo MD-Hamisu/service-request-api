@@ -17,4 +17,17 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
             @Param("categoryId") Long categoryId,
             Pageable pageable
     );
+
+    @Query("SELECT so FROM ServiceOffering so " +
+            "WHERE (:name IS NULL OR LOWER(so.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:categoryId IS NULL OR so.category.id = :categoryId) " +
+            "AND (:isActive IS NULL OR so.isActive = :isActive)"+
+            "ORDER BY so.created DESC")
+    Page<ServiceOffering> findServicesWithFilters(
+            @Param("name") String name,
+            @Param("categoryId") Long categoryId,
+            @Param("isActive") Boolean isActive,
+            Pageable pageable
+    );
+
 }

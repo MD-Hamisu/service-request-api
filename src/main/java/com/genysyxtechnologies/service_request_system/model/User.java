@@ -57,6 +57,10 @@ public class User implements UserDetails {
     private boolean accountNonLocked = true;
     private boolean credentialsNonExpired = true;
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
     // Spring Security UserDetails methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

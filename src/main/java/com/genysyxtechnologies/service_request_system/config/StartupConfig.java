@@ -10,6 +10,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @AllArgsConstructor
 public class StartupConfig {
@@ -26,7 +28,7 @@ public class StartupConfig {
             superAdmin.setEmail("superadmin@srs.com");
             superAdmin.setFirstName("Super");
             superAdmin.setLastName("Admin");
-            superAdmin.getRoles().add(Role.SUPER_ADMIN);
+            superAdmin.getRoles().addAll(List.of(Role.SUPER_ADMIN, Role.MANAGER));
             repository.save(superAdmin);
         }
     }

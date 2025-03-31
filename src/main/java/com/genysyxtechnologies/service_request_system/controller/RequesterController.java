@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/requester")
-@PreAuthorize("hasRole('REQUESTER')")
+@PreAuthorize("hasAuthority('REQUESTER')")
 @RequiredArgsConstructor
 @Tag(name = "Requester API", description = "Endpoints for requester operations in the Service Request System")
 public class RequesterController {

@@ -39,7 +39,7 @@ public class UserController {
     @Operation(summary = "Get all managers", description = "Retrieves a paginated list of managers with search filter")
     @ApiResponse(responseCode = "200", description = "List of managers retrieved successfully")
     @GetMapping("/managers")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllManagers(
             @RequestParam(value = "search", required = false) String search,
             @PageableDefault() Pageable pageable
@@ -53,7 +53,7 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping("/managers")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<UserResponse> createManager(@Valid @RequestBody UserDTO userDTO) {
         return ResponseEntity.ok(superAdminService.createManager(userDTO));
     }
@@ -64,7 +64,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Manager not found")
     })
     @PutMapping("/managers/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<UserResponse> updateManager(
             @PathVariable Long id,
             @Valid @RequestBody UserDTO userDTO
@@ -78,7 +78,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Manager not found")
     })
     @DeleteMapping("/managers/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
         superAdminService.deleteManager(id);
         return ResponseEntity.noContent().build();
@@ -87,7 +87,7 @@ public class UserController {
     @Operation(summary = "Get all requesters", description = "Retrieves a paginated list of requesters with search filter")
     @ApiResponse(responseCode = "200", description = "List of requesters retrieved successfully")
     @GetMapping("/requesters")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllRequesters(
             @RequestParam(value = "search", required = false) String search,
             @PageableDefault(size = 10) Pageable pageable
@@ -101,9 +101,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PutMapping("/{id}/reset-password")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<String> resetPassword(@PathVariable Long id) {
         userService.resetPassword(id);
         return ResponseEntity.ok("Password reset to 1-8 successfully");
     }
-} 
+}

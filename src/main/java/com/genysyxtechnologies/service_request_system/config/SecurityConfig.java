@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/**", "/login-doc") // Public endpoints for auth
                         .permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").hasAuthority("SUPER_ADMIN")
                         .anyRequest()
                         .authenticated()
                 )

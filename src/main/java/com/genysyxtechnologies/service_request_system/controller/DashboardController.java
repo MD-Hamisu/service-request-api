@@ -28,7 +28,7 @@ public class DashboardController {
     @Operation(summary = "Get manager dashboard statistics", description = "Retrieves statistics for the manager dashboard")
     @ApiResponse(responseCode = "200", description = "Dashboard statistics retrieved successfully")
     @GetMapping("/manager")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<DashboardResponse> getManagerDashboardStats() {
         return ResponseEntity.ok(managerService.getDashboardStats());
     }
@@ -36,8 +36,8 @@ public class DashboardController {
     @Operation(summary = "Get super admin dashboard statistics", description = "Retrieves statistics for the super admin dashboard")
     @ApiResponse(responseCode = "200", description = "Dashboard statistics retrieved successfully")
     @GetMapping("/super-admin")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     public ResponseEntity<SuperAdminDashboardResponse> getSuperAdminDashboardStats() {
         return ResponseEntity.ok(superAdminService.getDashboardStats());
     }
-} 
+}

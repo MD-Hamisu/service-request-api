@@ -52,7 +52,7 @@ public class ServiceController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ServiceOfferingResponse> createService(@Valid @RequestBody ServiceOfferingDTO serviceDTO) {
         return ResponseEntity.ok(managerService.createService(serviceDTO));
     }
@@ -63,7 +63,7 @@ public class ServiceController {
             @ApiResponse(responseCode = "404", description = "Service not found")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<ServiceOfferingResponse> updateService(
             @PathVariable Long id,
             @Valid @RequestBody ServiceOfferingDTO serviceDTO
@@ -77,9 +77,9 @@ public class ServiceController {
             @ApiResponse(responseCode = "404", description = "Service not found")
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasAuthority('MANAGER')")
     public ResponseEntity<Void> deleteService(@PathVariable Long id) {
         managerService.deleteService(id);
         return ResponseEntity.noContent().build();
     }
-} 
+}

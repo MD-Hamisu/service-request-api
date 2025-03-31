@@ -1,5 +1,15 @@
 package com.genysyxtechnologies.service_request_system.service.impl;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
 import com.genysyxtechnologies.service_request_system.dtos.request.CategoryDTO;
 import com.genysyxtechnologies.service_request_system.dtos.request.ServiceOfferingDTO;
@@ -15,16 +25,8 @@ import com.genysyxtechnologies.service_request_system.repository.ServiceOffering
 import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
 import com.genysyxtechnologies.service_request_system.service.EmailService;
 import com.genysyxtechnologies.service_request_system.service.ManagerService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -115,6 +117,15 @@ public class ManagerServiceImpl implements ManagerService {
         category.setName(categoryDTO.name());
         Category savedCategory = categoryRepository.save(category);
         return new CategoryResponse(savedCategory.getId(), savedCategory.getName());
+    }
+
+    @Override
+    public CategoryResponse updateCategory(Long id, CategoryDTO categoryDTO) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+        category.setName(categoryDTO.name());
+        Category updatedCategory = categoryRepository.save(category);
+        return new CategoryResponse(updatedCategory.getId(), updatedCategory.getName());
     }
 
     @Override

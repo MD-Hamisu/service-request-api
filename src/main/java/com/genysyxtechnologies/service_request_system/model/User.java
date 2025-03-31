@@ -1,5 +1,6 @@
 package com.genysyxtechnologies.service_request_system.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.genysyxtechnologies.service_request_system.constant.Role;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class User implements UserDetails {
     private String username;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false)

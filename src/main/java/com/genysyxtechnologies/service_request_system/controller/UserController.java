@@ -1,43 +1,45 @@
 package com.genysyxtechnologies.service_request_system.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.genysyxtechnologies.service_request_system.dtos.request.UserDTO;
-import com.genysyxtechnologies.service_request_system.dtos.response.SuperAdminDashboardResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.UserResponse;
 import com.genysyxtechnologies.service_request_system.service.SuperAdminService;
 import com.genysyxtechnologies.service_request_system.service.UserService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/super-admin")
-@PreAuthorize("hasRole('SUPER_ADMIN')")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-@Tag(name = "Super Admin API", description = "Endpoints for super admin operations in the Service Request System")
-public class SuperAdminController {
+@Tag(name = "User API", description = "Endpoints for managing users")
+public class UserController {
 
     private final SuperAdminService superAdminService;
     private final UserService userService;
 
-    @Operation(summary = "Get dashboard statistics", description = "Retrieves statistics for the super admin dashboard")
-    @ApiResponse(responseCode = "200", description = "Dashboard statistics retrieved successfully")
-    @GetMapping("/dashboard")
-    public ResponseEntity<SuperAdminDashboardResponse> getDashboardStats() {
-        return ResponseEntity.ok(superAdminService.getDashboardStats());
-    }
-
     @Operation(summary = "Get all managers", description = "Retrieves a paginated list of managers with search filter")
     @ApiResponse(responseCode = "200", description = "List of managers retrieved successfully")
     @GetMapping("/managers")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllManagers(
             @RequestParam(value = "search", required = false) String search,
             @PageableDefault() Pageable pageable
@@ -51,6 +53,7 @@ public class SuperAdminController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping("/managers")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<UserResponse> createManager(@Valid @RequestBody UserDTO userDTO) {
         return ResponseEntity.ok(superAdminService.createManager(userDTO));
     }
@@ -61,6 +64,7 @@ public class SuperAdminController {
             @ApiResponse(responseCode = "404", description = "Manager not found")
     })
     @PutMapping("/managers/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<UserResponse> updateManager(
             @PathVariable Long id,
             @Valid @RequestBody UserDTO userDTO
@@ -74,6 +78,7 @@ public class SuperAdminController {
             @ApiResponse(responseCode = "404", description = "Manager not found")
     })
     @DeleteMapping("/managers/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
         superAdminService.deleteManager(id);
         return ResponseEntity.noContent().build();
@@ -82,6 +87,7 @@ public class SuperAdminController {
     @Operation(summary = "Get all requesters", description = "Retrieves a paginated list of requesters with search filter")
     @ApiResponse(responseCode = "200", description = "List of requesters retrieved successfully")
     @GetMapping("/requesters")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Page<UserResponse>> getAllRequesters(
             @RequestParam(value = "search", required = false) String search,
             @PageableDefault(size = 10) Pageable pageable
@@ -94,9 +100,10 @@ public class SuperAdminController {
             @ApiResponse(responseCode = "200", description = "Password reset successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PutMapping("/users/{id}/reset-password")
+    @PutMapping("/{id}/reset-password")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<String> resetPassword(@PathVariable Long id) {
         userService.resetPassword(id);
         return ResponseEntity.ok("Password reset to 1-8 successfully");
     }
-}
+} 

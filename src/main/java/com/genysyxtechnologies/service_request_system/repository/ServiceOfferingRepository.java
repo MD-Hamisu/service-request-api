@@ -9,22 +9,27 @@ import org.springframework.data.repository.query.Param;
 
 public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering, Long> {
     // Service Query for Requesters
-    @Query("SELECT so FROM ServiceOffering so " +
-            "WHERE so.isActive = true " +
-            "AND (:name IS NULL OR LOWER(so.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-            "AND (:categoryId IS NULL OR so.category.id = :categoryId)")
+    @Query(value = "SELECT * FROM services so " +
+        "WHERE so.is_active = true " +
+        "AND (:name IS NULL OR LOWER(so.name::text) LIKE LOWER(CONCAT('%', COALESCE(:name, ''), '%'))) " +
+        "AND (:categoryId IS NULL OR so.category_id = :categoryId) " +
+        "ORDER BY so.created DESC",
+        nativeQuery = true)
     Page<ServiceOffering> findAvailableServices(
-            @Param("name") String name,
-            @Param("categoryId") Long categoryId,
-            Pageable pageable
+        @Param("name") String name,
+        @Param("categoryId") Long categoryId,
+        Pageable pageable
     );
 
+
     // Service Query For Managers
-    @Query("SELECT so FROM ServiceOffering so " +
-            "WHERE (:name IS NULL OR LOWER(so.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-            "AND (:categoryId IS NULL OR so.category.id = :categoryId) " +
-            "AND (:isActive IS NULL OR so.isActive = :isActive)"+
-            "ORDER BY so.created DESC")
+    @Query(value = "SELECT * FROM services so " +
+        "WHERE (:name IS NULL OR LOWER(so.name::text) LIKE LOWER(CONCAT('%', COALESCE(:name,''), '%'))) " +
+        "AND (:categoryId IS NULL OR so.category_id = :categoryId) " +
+        "AND (:isActive IS NULL OR so.is_active = :isActive) " +
+        "ORDER BY so.created DESC",
+        nativeQuery = true
+    )
     Page<ServiceOffering> findServicesWithFilters(
             @Param("name") String name,
             @Param("categoryId") Long categoryId,

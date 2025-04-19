@@ -1,5 +1,19 @@
 package com.genysyxtechnologies.service_request_system.service.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,23 +27,12 @@ import com.genysyxtechnologies.service_request_system.model.User;
 import com.genysyxtechnologies.service_request_system.repository.CategoryRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
+import com.genysyxtechnologies.service_request_system.repository.specification.ServiceRequestSpecification;
 import com.genysyxtechnologies.service_request_system.service.EmailService;
 import com.genysyxtechnologies.service_request_system.service.RequesterService;
 import com.genysyxtechnologies.service_request_system.service.util.SecurityUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +54,7 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
+                service.getCategory().getId(),
                 service.getFieldSchema(),
                 service.isActive()
         ));
@@ -86,13 +90,14 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
+                service.getCategory().getId(),
                 service.getFieldSchema(),
                 service.isActive()
         );
     }
 
     @Override
-    public String submitRequest(Long serviceId, String requestData, MultipartFile attachment) {
+    public ServiceRequest submitRequest(Long serviceId, String requestData, MultipartFile attachment) {
         // Validate service
         ServiceOffering service = serviceOfferingRepository.findById(serviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
@@ -104,7 +109,7 @@ public class RequesterServiceImpl implements RequesterService {
         User user = securityUtil.getCurrentUser();
 
         // Validate requestData against formTemplate
-        validateRequestData(service.getFieldSchema(), requestData);
+        //validateRequestData(service.getFieldSchema(), requestData);
 
         // Handle attachment (if any)
         String attachmentUrl = null;
@@ -132,7 +137,7 @@ public class RequesterServiceImpl implements RequesterService {
         // Send email notification to the Requester
         emailService.sendRequestSubmissionEmail(user, request);
 
-        return "Request submitted successfully";
+        return request;
     }
 
     // Helper method to validate Request submitted Json data over the Service DataSchema
@@ -159,14 +164,11 @@ public class RequesterServiceImpl implements RequesterService {
     public Page<ServiceRequestResponse> getUserRequests(ServiceRequestStatus status, String search, Pageable pageable) {
         User user = securityUtil.getCurrentUser();
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
-        Page<ServiceRequest> requests = serviceRequestRepository.findByUserIdWithFilters(
-                user.getId(),
-                status,
-                searchTerm,
-                pageable
+        Page<ServiceRequest> requests = serviceRequestRepository.findAll(
+            ServiceRequestSpecification.withUserFilters(user.getId(), status, searchTerm),
+            pageable
         );
 
-        // convert to a response Dto and return
         return requests.map(request -> new ServiceRequestResponse(
                 request.getId(),
                 request.getService().getName(),

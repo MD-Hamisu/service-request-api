@@ -66,9 +66,11 @@ public class User implements UserDetails {
     // Spring Security UserDetails methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
+        var r = roles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
-                .collect(Collectors.toSet()); // Use Set to avoid duplicates
+                .collect(Collectors.toSet());
+        r.addAll(getRoles().stream().map(e -> new SimpleGrantedAuthority(e.name())).collect(Collectors.toSet())); // Use Set to avoid duplicates
+        return r;
     }
 
     @Override

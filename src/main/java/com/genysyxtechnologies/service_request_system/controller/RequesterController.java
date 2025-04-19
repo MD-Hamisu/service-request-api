@@ -5,6 +5,7 @@ import com.genysyxtechnologies.service_request_system.dtos.request.SubmitRequest
 import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
+import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
 import com.genysyxtechnologies.service_request_system.service.RequesterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,6 +18,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -73,12 +75,12 @@ public class RequesterController {
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "Service not found")
     })
-    @PostMapping(value = "/request/{serviceId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> submitRequest(
+    @PostMapping(value = "/request/{serviceId}")
+    public ResponseEntity<?> submitRequest(
             @PathVariable Long serviceId,
-            @ModelAttribute SubmitRequestDTO requestDTO
+            @RequestBody @Validated SubmitRequestDTO requestDTO
     ) {
-        return ResponseEntity.ok(requesterService.submitRequest(serviceId, requestDTO.requestData(), requestDTO.attachment()));
+        return ResponseEntity.ok(requesterService.submitRequest(serviceId, requestDTO.requestData(), null));
     }
 
     // Requests Page: Fetch the authenticated user's requests with status and search filters

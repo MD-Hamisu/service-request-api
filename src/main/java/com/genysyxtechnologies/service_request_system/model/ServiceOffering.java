@@ -17,7 +17,7 @@ public class ServiceOffering {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, columnDefinition = "text")
     private String name;
 
     private String description;

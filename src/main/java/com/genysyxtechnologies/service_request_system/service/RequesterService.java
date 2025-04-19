@@ -4,6 +4,8 @@ import com.genysyxtechnologies.service_request_system.constant.ServiceRequestSta
 import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
+import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +16,6 @@ public interface RequesterService {
     Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Pageable pageable);
     List<CategoryResponse> getCategories();
     ServiceOfferingResponse getServiceForRequestForm(Long serviceId);
-    String submitRequest(Long serviceId, String requestData, MultipartFile attachment);
+    ServiceRequest submitRequest(Long serviceId, String requestData, MultipartFile attachment);
     Page<ServiceRequestResponse> getUserRequests(ServiceRequestStatus status, String search, Pageable pageable);
 }

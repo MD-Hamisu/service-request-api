@@ -37,8 +37,7 @@ public class ServiceRequest {
      * JSON string containing the actual data submitted by the requester, conforming to the
      * structure defined in the associated ServiceOffering's fieldSchema.
      */
-    @Column(name = "submitted_data", columnDefinition = "jsonb", nullable = false)
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "submitted_data", columnDefinition = "text", nullable = false, length = 10000)
     private String submittedData; // JSON string for submitted data
 
     private String attachmentUrl;

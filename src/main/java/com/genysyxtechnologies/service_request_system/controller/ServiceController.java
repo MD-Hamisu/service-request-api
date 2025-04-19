@@ -1,10 +1,12 @@
 package com.genysyxtechnologies.service_request_system.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +26,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -41,9 +45,9 @@ public class ServiceController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "isActive", required = false) Boolean isActive,
-            @PageableDefault() Pageable pageable
+            @RequestParam("page") @Min(value = 1) Integer page, @RequestParam("size") Integer size
     ) {
-        return ResponseEntity.ok(managerService.getAllServices(name, categoryId, isActive, pageable));
+        return ResponseEntity.ok(managerService.getAllServices(name, categoryId, isActive, PageRequest.of(page - 1, size)));
     }
 
     @Operation(summary = "Create a new service", description = "Allows a manager to define a new service")
@@ -52,8 +56,7 @@ public class ServiceController {
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     @PostMapping
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ServiceOfferingResponse> createService(@Valid @RequestBody ServiceOfferingDTO serviceDTO) {
+        public ResponseEntity<ServiceOfferingResponse> createService(@Validated @RequestBody ServiceOfferingDTO serviceDTO) {
         return ResponseEntity.ok(managerService.createService(serviceDTO));
     }
 
@@ -63,10 +66,9 @@ public class ServiceController {
             @ApiResponse(responseCode = "404", description = "Service not found")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ServiceOfferingResponse> updateService(
+        public ResponseEntity<ServiceOfferingResponse> updateService(
             @PathVariable Long id,
-            @Valid @RequestBody ServiceOfferingDTO serviceDTO
+            @Validated @RequestBody ServiceOfferingDTO serviceDTO
     ) {
         return ResponseEntity.ok(managerService.updateService(id, serviceDTO));
     }
@@ -77,8 +79,7 @@ public class ServiceController {
             @ApiResponse(responseCode = "404", description = "Service not found")
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<Void> deleteService(@PathVariable Long id) {
+        public ResponseEntity<Void> deleteService(@PathVariable Long id) {
         managerService.deleteService(id);
         return ResponseEntity.noContent().build();
     }

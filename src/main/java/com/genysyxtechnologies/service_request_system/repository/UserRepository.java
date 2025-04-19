@@ -18,11 +18,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRolesContaining(Role role);
 
-    @Query("SELECT u FROM User u " +
-            "WHERE :role IN elements(u.roles) " +
-            "AND (:search IS NULL OR " +
-            "LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-            "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+    @Query(value = "SELECT u.* FROM users u " +
+        "JOIN user_roles ur ON u.id = ur.user_id " +
+        "WHERE ur.role = :role " +
+        "AND (:search IS NULL OR " +
+        "LOWER(u.username::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+        "LOWER(u.email::text) LIKE LOWER(CONCAT('%', :search, '%')))", nativeQuery = true)
     Page<User> findByRoleWithFilters(
             @Param("role") Role role,
             @Param("search") String search,

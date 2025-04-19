@@ -23,6 +23,7 @@ import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
 import com.genysyxtechnologies.service_request_system.repository.CategoryRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
+import com.genysyxtechnologies.service_request_system.repository.specification.ServiceRequestSpecification;
 import com.genysyxtechnologies.service_request_system.service.EmailService;
 import com.genysyxtechnologies.service_request_system.service.ManagerService;
 
@@ -55,6 +56,7 @@ public class ManagerServiceImpl implements ManagerService {
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
+                service.getCategory().getId(),
                 service.getFieldSchema(),
                 service.isActive()
         ));
@@ -70,6 +72,7 @@ public class ManagerServiceImpl implements ManagerService {
                 savedService.getName(),
                 savedService.getDescription(),
                 savedService.getCategory().getName(),
+                savedService.getCategory().getId(),
                 savedService.getFieldSchema(),
                 savedService.isActive()
         );
@@ -86,6 +89,7 @@ public class ManagerServiceImpl implements ManagerService {
                 updatedService.getName(),
                 updatedService.getDescription(),
                 updatedService.getCategory().getName(),
+                updatedService.getCategory().getId(),
                 updatedService.getFieldSchema(),
                 updatedService.isActive()
         );
@@ -131,7 +135,10 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public Page<ServiceRequestResponse> getAllRequests(ServiceRequestStatus status, String search, Pageable pageable) {
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
-        Page<ServiceRequest> requests = serviceRequestRepository.findRequestsWithFilters(status, searchTerm, pageable);
+        Page<ServiceRequest> requests = serviceRequestRepository.findAll(
+            ServiceRequestSpecification.withFilters(status, searchTerm),
+            pageable
+        );
         return requests.map(request -> new ServiceRequestResponse(
                 request.getId(),
                 request.getService().getName(),

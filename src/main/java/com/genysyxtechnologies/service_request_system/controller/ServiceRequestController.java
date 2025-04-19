@@ -10,11 +10,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
+import com.genysyxtechnologies.service_request_system.dtos.request.UpdateStatusDto;
 import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
 import com.genysyxtechnologies.service_request_system.service.ManagerService;
 
@@ -35,8 +37,7 @@ public class ServiceRequestController {
     @Operation(summary = "Get all requests", description = "Retrieves a paginated list of service requests with filters")
     @ApiResponse(responseCode = "200", description = "List of requests retrieved successfully")
     @GetMapping
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<Page<ServiceRequestResponse>> getAllRequests(
+        public ResponseEntity<Page<ServiceRequestResponse>> getAllRequests(
             @RequestParam(value = "status", required = false) ServiceRequestStatus status,
             @RequestParam(value = "search", required = false) String search,
             @PageableDefault() Pageable pageable
@@ -50,8 +51,7 @@ public class ServiceRequestController {
             @ApiResponse(responseCode = "404", description = "Request not found")
     })
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ServiceRequestResponse> getRequestDetails(@PathVariable Long id) {
+        public ResponseEntity<ServiceRequestResponse> getRequestDetails(@PathVariable Long id) {
         return ResponseEntity.ok(managerService.getRequestDetails(id));
     }
 
@@ -61,19 +61,17 @@ public class ServiceRequestController {
             @ApiResponse(responseCode = "404", description = "Request not found")
     })
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<ServiceRequestResponse> updateRequestStatus(
+        public ResponseEntity<ServiceRequestResponse> updateRequestStatus(
             @PathVariable Long id,
-            @RequestParam ServiceRequestStatus status
+            @RequestBody UpdateStatusDto dto
     ) {
-        return ResponseEntity.ok(managerService.updateRequestStatus(id, status));
+        return ResponseEntity.ok(managerService.updateRequestStatus(id, dto.status()));
     }
 
     @Operation(summary = "Get all request statuses", description = "Retrieves a list of all possible request statuses")
     @ApiResponse(responseCode = "200", description = "List of request statuses retrieved successfully")
     @GetMapping("/statuses")
-    @PreAuthorize("hasAuthority('MANAGER')")
-    public ResponseEntity<List<String>> getAllRequestStatuses() {
+        public ResponseEntity<List<String>> getAllRequestStatuses() {
         return ResponseEntity.ok(managerService.getAllRequestStatuses());
     }
 }

@@ -26,6 +26,10 @@ public class ServiceOffering {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
     /**
      * JSON string defining the structure of custom fields required for requests of this service.
      * Example: {"issueType": "dropdown", "description": "text"}

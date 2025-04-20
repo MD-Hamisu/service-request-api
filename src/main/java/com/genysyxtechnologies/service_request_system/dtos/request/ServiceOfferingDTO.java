@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotNull;
 
 
 public record ServiceOfferingDTO(
-        @NotBlank(message = "Name is Required") String name,
-        @NotBlank(message = "Description is required") String description,
-        @NotNull(message = "Category is required") Long categoryId,
-        @NotBlank(message = "Field Schema is required") String fields, // JSON string
-        boolean isActive // default is true on creation
-) {
-}
+        @NotBlank(message = "Service name is required") String name,
+        String description,
+        @NotNull(message = "Category ID is required") Long categoryId,
+        @NotNull(message = "Department ID is required") Long departmentId,
+        @NotBlank(message = "Field schema is required") String fields,
+        boolean isActive
+) {}

@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.genysyxtechnologies.service_request_system.model.Department;
+import com.genysyxtechnologies.service_request_system.repository.DepartmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -40,21 +42,24 @@ public class RequesterServiceImpl implements RequesterService {
 
     private final ServiceOfferingRepository serviceOfferingRepository;
     private final ServiceRequestRepository serviceRequestRepository;
+    private final DepartmentRepository departmentRepository;
     private final SecurityUtil securityUtil;
     private final ObjectMapper jacksonObjectMapper;
     private final CategoryRepository categoryRepository;
     private final EmailService emailService;
 
     @Override
-    public Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Pageable pageable) {
+    public Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Long departmentId, Pageable pageable) {
         String nameParam = (name != null && !name.trim().isEmpty()) ? name : null;
-        Page<ServiceOffering> services = serviceOfferingRepository.findAvailableServices(nameParam, categoryId, pageable);
+        Page<ServiceOffering> services = serviceOfferingRepository.findAvailableServices(nameParam, categoryId, departmentId, pageable);
         return services.map(service -> new ServiceOfferingResponse(
                 service.getId(),
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
                 service.getCategory().getId(),
+                service.getDepartment().getId(),
+                service.getDepartment().getName(),
                 service.getFieldSchema(),
                 service.isActive()
         ));
@@ -62,7 +67,6 @@ public class RequesterServiceImpl implements RequesterService {
 
     @Override
     public List<CategoryResponse> getCategories() {
-        // Fetch all categories, map to DTO and return
         return categoryRepository.findAll()
                 .stream()
                 .map(category -> new CategoryResponse(
@@ -72,50 +76,54 @@ public class RequesterServiceImpl implements RequesterService {
                 .collect(Collectors.toList());
     }
 
-    // Fetches a specific ServiceOffering by serviceId to render the new request form, including its fieldSchema
     @Override
     public ServiceOfferingResponse getServiceForRequestForm(Long serviceId) {
-        // Fetch the service by ID
         ServiceOffering service = serviceOfferingRepository.findById(serviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
-        // Ensure the service is active
         if (!service.isActive()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Service is not active");
         }
 
-        // Map to DTO and return
         return new ServiceOfferingResponse(
                 service.getId(),
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
                 service.getCategory().getId(),
+                service.getDepartment().getId(),
+                service.getDepartment().getName(),
                 service.getFieldSchema(),
                 service.isActive()
         );
     }
 
     @Override
-    public ServiceRequest submitRequest(Long serviceId, String requestData, MultipartFile attachment) {
-        // Validate service
+    public ServiceRequest submitRequest(Long serviceId, String requestData, Long userDepartmentId, Long targetDepartmentId, MultipartFile attachment) {
         ServiceOffering service = serviceOfferingRepository.findById(serviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
         if (!service.isActive()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Service is not active");
         }
 
-        // Get authenticated user
         User user = securityUtil.getCurrentUser();
 
-        // Validate requestData against formTemplate
-        //validateRequestData(service.getFieldSchema(), requestData);
+        Department userDepartment = departmentRepository.findById(userDepartmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User department not found"));
 
-        // Handle attachment (if any)
+        Department targetDepartment = departmentRepository.findById(targetDepartmentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target department not found"));
+
+        if (!targetDepartment.getId().equals(service.getDepartment().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Target department does not match the service's department");
+        }
+
+        validateRequestData(service.getFieldSchema(), requestData);
+
         String attachmentUrl = null;
         if (attachment != null && !attachment.isEmpty()) {
             String fileName = System.currentTimeMillis() + "_" + attachment.getOriginalFilename();
-            File file = new File("uploads/" + fileName); // Ensure "uploads" directory exists
+            File file = new File("uploads/" + fileName);
             try {
                 attachment.transferTo(file);
                 attachmentUrl = "/uploads/" + fileName;
@@ -124,30 +132,27 @@ public class RequesterServiceImpl implements RequesterService {
             }
         }
 
-        // Create ServiceRequest
         ServiceRequest request = new ServiceRequest();
         request.setUser(user);
         request.setService(service);
+        request.setUserDepartment(userDepartment);
+        request.setTargetDepartment(targetDepartment);
         request.setStatus(ServiceRequestStatus.PENDING);
         request.setSubmissionDate(LocalDateTime.now());
         request.setSubmittedData(requestData);
         request.setAttachmentUrl(attachmentUrl);
         serviceRequestRepository.save(request);
 
-        // Send email notification to the Requester
         emailService.sendRequestSubmissionEmail(user, request);
 
         return request;
     }
 
-    // Helper method to validate Request submitted Json data over the Service DataSchema
     private void validateRequestData(String formTemplate, String requestData) {
         try {
-            // Parse formTemplate and requestData as JSON
             JsonNode templateNode = jacksonObjectMapper.readTree(formTemplate);
             JsonNode dataNode = jacksonObjectMapper.readTree(requestData);
 
-            // Check for extra fields in requestData that are not in formTemplate
             for (Iterator<String> it = dataNode.fieldNames(); it.hasNext(); ) {
                 String fieldName = it.next();
                 if (!templateNode.has(fieldName)) {
@@ -165,14 +170,16 @@ public class RequesterServiceImpl implements RequesterService {
         User user = securityUtil.getCurrentUser();
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
         Page<ServiceRequest> requests = serviceRequestRepository.findAll(
-            ServiceRequestSpecification.withUserFilters(user.getId(), status, searchTerm),
-            pageable
+                ServiceRequestSpecification.withUserFilters(user.getId(), status, searchTerm),
+                pageable
         );
 
         return requests.map(request -> new ServiceRequestResponse(
                 request.getId(),
                 request.getService().getName(),
                 request.getUser().getFullName(),
+                request.getUserDepartment().getName(),
+                request.getTargetDepartment().getName(),
                 request.getSubmissionDate().toString(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),

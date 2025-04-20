@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.genysyxtechnologies.service_request_system.model.Department;
+import com.genysyxtechnologies.service_request_system.repository.DepartmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,7 @@ public class ManagerServiceImpl implements ManagerService {
     private final ServiceOfferingRepository serviceOfferingRepository;
     private final CategoryRepository categoryRepository;
     private final ServiceRequestRepository serviceRequestRepository;
+    private final DepartmentRepository departmentRepository;
     private final EmailService emailService;
 
     @Override
@@ -48,15 +51,17 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public Page<ServiceOfferingResponse> getAllServices(String name, Long categoryId, Boolean isActive, Pageable pageable) {
+    public Page<ServiceOfferingResponse> getAllServices(String name, Long categoryId, Long departmentId, Boolean isActive, Pageable pageable) {
         String nameParam = (name != null && !name.trim().isEmpty()) ? name : null;
-        Page<ServiceOffering> services = serviceOfferingRepository.findServicesWithFilters(nameParam, categoryId, isActive, pageable);
+        Page<ServiceOffering> services = serviceOfferingRepository.findServicesWithFilters(nameParam, categoryId, departmentId, isActive, pageable);
         return services.map(service -> new ServiceOfferingResponse(
                 service.getId(),
                 service.getName(),
                 service.getDescription(),
                 service.getCategory().getName(),
                 service.getCategory().getId(),
+                service.getDepartment().getId(),
+                service.getDepartment().getName(),
                 service.getFieldSchema(),
                 service.isActive()
         ));
@@ -73,6 +78,8 @@ public class ManagerServiceImpl implements ManagerService {
                 savedService.getDescription(),
                 savedService.getCategory().getName(),
                 savedService.getCategory().getId(),
+                savedService.getDepartment().getId(),
+                savedService.getDepartment().getName(),
                 savedService.getFieldSchema(),
                 savedService.isActive()
         );
@@ -90,6 +97,8 @@ public class ManagerServiceImpl implements ManagerService {
                 updatedService.getDescription(),
                 updatedService.getCategory().getName(),
                 updatedService.getCategory().getId(),
+                updatedService.getDepartment().getId(),
+                updatedService.getDepartment().getName(),
                 updatedService.getFieldSchema(),
                 updatedService.isActive()
         );
@@ -136,13 +145,15 @@ public class ManagerServiceImpl implements ManagerService {
     public Page<ServiceRequestResponse> getAllRequests(ServiceRequestStatus status, String search, Pageable pageable) {
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
         Page<ServiceRequest> requests = serviceRequestRepository.findAll(
-            ServiceRequestSpecification.withFilters(status, searchTerm),
-            pageable
+                ServiceRequestSpecification.withFilters(status, searchTerm),
+                pageable
         );
         return requests.map(request -> new ServiceRequestResponse(
                 request.getId(),
                 request.getService().getName(),
                 request.getUser().getUsername(),
+                request.getUserDepartment().getName(),
+                request.getTargetDepartment().getName(),
                 request.getSubmissionDate().toString(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),
@@ -158,6 +169,8 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getId(),
                 request.getService().getName(),
                 request.getUser().getUsername(),
+                request.getUserDepartment().getName(),
+                request.getTargetDepartment().getName(),
                 request.getSubmissionDate().toString(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),
@@ -170,18 +183,18 @@ public class ManagerServiceImpl implements ManagerService {
         ServiceRequest request = serviceRequestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found"));
 
-        // Check if the status is actually changing
         if (!request.getStatus().equals(status)) {
             request.setStatus(status);
             ServiceRequest updatedRequest = serviceRequestRepository.save(request);
 
-            // Send email notification to the Requester
             emailService.sendRequestStatusChangeEmail(updatedRequest.getUser(), updatedRequest);
 
             return new ServiceRequestResponse(
                     updatedRequest.getId(),
                     updatedRequest.getService().getName(),
                     updatedRequest.getUser().getUsername(),
+                    updatedRequest.getUserDepartment().getName(),
+                    updatedRequest.getTargetDepartment().getName(),
                     updatedRequest.getSubmissionDate().toString(),
                     updatedRequest.getStatus().toString(),
                     updatedRequest.getSubmittedData(),
@@ -189,11 +202,12 @@ public class ManagerServiceImpl implements ManagerService {
             );
         }
 
-        // If status didn't change, return the current request without sending an email
         return new ServiceRequestResponse(
                 request.getId(),
                 request.getService().getName(),
                 request.getUser().getUsername(),
+                request.getUserDepartment().getName(),
+                request.getTargetDepartment().getName(),
                 request.getSubmissionDate().toString(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),
@@ -208,7 +222,6 @@ public class ManagerServiceImpl implements ManagerService {
                 .collect(Collectors.toList());
     }
 
-    // Mapping Method
     private void mapToServiceOfferingEntity(ServiceOfferingDTO dto, ServiceOffering serviceOffering) {
         serviceOffering.setName(dto.name());
         serviceOffering.setDescription(dto.description());
@@ -216,6 +229,11 @@ public class ManagerServiceImpl implements ManagerService {
             Category category = categoryRepository.findById(dto.categoryId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
             serviceOffering.setCategory(category);
+        }
+        if (dto.departmentId() != null) {
+            Department department = departmentRepository.findById(dto.departmentId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+            serviceOffering.setDepartment(department);
         }
         serviceOffering.setFieldSchema(dto.fields());
         serviceOffering.setActive(dto.isActive());

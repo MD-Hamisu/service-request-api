@@ -15,7 +15,7 @@ import com.genysyxtechnologies.service_request_system.dtos.response.ServiceReque
 
 public interface ManagerService {
     DashboardResponse getDashboardStats();
-    Page<ServiceOfferingResponse> getAllServices(String name, Long categoryId, Boolean isActive, Pageable pageable);
+    Page<ServiceOfferingResponse> getAllServices(String name, Long categoryId, Long departmentId, Boolean isActive, Pageable pageable);
     ServiceOfferingResponse createService(ServiceOfferingDTO serviceOfferingDTO);
     ServiceOfferingResponse updateService(Long id, ServiceOfferingDTO serviceOfferingDTO);
     void deleteService(Long id);

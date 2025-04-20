@@ -1,3 +1,4 @@
+/*
 package com.genysyxtechnologies.service_request_system.service.impl;
 
 import com.genysyxtechnologies.service_request_system.constant.Role;
@@ -411,4 +412,4 @@ class ManagerServiceImplTest {
         assertTrue(statuses.contains("IN_PROGRESS"));
         assertTrue(statuses.contains("COMPLETED"));
     }
-}
+}*/

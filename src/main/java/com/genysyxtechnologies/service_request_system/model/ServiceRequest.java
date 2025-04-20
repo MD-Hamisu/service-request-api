@@ -4,8 +4,6 @@ import com.genysyxtechnologies.service_request_system.constant.ServiceRequestSta
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +22,14 @@ public class ServiceRequest {
     @ManyToOne
     @JoinColumn(name = "service_id")
     private ServiceOffering service;
+
+    @ManyToOne
+    @JoinColumn(name = "user_department_id", nullable = false)
+    private Department userDepartment;
+
+    @ManyToOne
+    @JoinColumn(name = "target_department_id", nullable = false)
+    private Department targetDepartment;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

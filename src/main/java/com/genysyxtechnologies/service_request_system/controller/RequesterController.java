@@ -3,9 +3,10 @@ package com.genysyxtechnologies.service_request_system.controller;
 import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
 import com.genysyxtechnologies.service_request_system.dtos.request.SubmitRequestDTO;
 import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
+import com.genysyxtechnologies.service_request_system.dtos.response.DepartmentResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
-import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
+import com.genysyxtechnologies.service_request_system.service.DepartmentService;
 import com.genysyxtechnologies.service_request_system.service.RequesterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
 public class RequesterController {
 
     private final RequesterService requesterService;
+    private final DepartmentService departmentService;
 
-    // Homepage: Fetch available services with name and category filters
-    @Operation(summary = "Get available services", description = "Retrieves a list of active services available to requesters, filtered by name and category")
+    @Operation(summary = "Get available services", description = "Retrieves a list of active services available to requesters, filtered by name, category, and department")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of services retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input parameters")
@@ -44,12 +44,19 @@ public class RequesterController {
     public ResponseEntity<Page<ServiceOfferingResponse>> getAvailableServices(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "departmentId", required = false) Long departmentId,
             @PageableDefault() Pageable pageable
     ) {
-        return ResponseEntity.ok(requesterService.getAvailableServices(name, categoryId, pageable));
+        return ResponseEntity.ok(requesterService.getAvailableServices(name, categoryId, departmentId, pageable));
     }
 
-    // Homepage: Fetch all categories for the filter dropdown
+    @Operation(summary = "Get all departments", description = "Retrieves a list of all departments for filtering services")
+    @ApiResponse(responseCode = "200", description = "List of departments retrieved successfully")
+    @GetMapping("/departments")
+    public ResponseEntity<List<DepartmentResponse>> getDepartments() {
+        return ResponseEntity.ok(departmentService.getAllDepartments());
+    }
+
     @Operation(summary = "Get all categories", description = "Retrieves a list of all categories for filtering services")
     @ApiResponse(responseCode = "200", description = "List of categories retrieved successfully")
     @GetMapping("/categories")
@@ -57,8 +64,7 @@ public class RequesterController {
         return ResponseEntity.ok(requesterService.getCategories());
     }
 
-    // New Request Form: Fetch service details (including formTemplate) for the form
-    @Operation(summary = "Get service for request", description = "Retrieves details of a specific service, including its form template, to render the request form")
+    @Operation(summary = "Get service for request", description = "Retrieves details of a specific service, including 🙂its form template, to render the request form")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Service details retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Service not found")
@@ -68,7 +74,6 @@ public class RequesterController {
         return ResponseEntity.ok(requesterService.getServiceForRequestForm(serviceId));
     }
 
-    // New Request Form: Submit a new request with form data and optional attachment
     @Operation(summary = "Submit a service request", description = "Allows a requester to submit a new service request with form data and an optional attachment")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Request submitted successfully"),
@@ -80,10 +85,15 @@ public class RequesterController {
             @PathVariable Long serviceId,
             @RequestBody @Validated SubmitRequestDTO requestDTO
     ) {
-        return ResponseEntity.ok(requesterService.submitRequest(serviceId, requestDTO.requestData(), null));
+        return ResponseEntity.ok(requesterService.submitRequest(
+                serviceId,
+                requestDTO.requestData(),
+                requestDTO.userDepartmentId(),
+                requestDTO.targetDepartmentId(),
+                null
+        ));
     }
 
-    // Requests Page: Fetch the authenticated user's requests with status and search filters
     @Operation(summary = "Get user requests", description = "Retrieves a paginated list of requests submitted by the authenticated user, filtered by status and search term")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of user requests retrieved successfully"),

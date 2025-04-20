@@ -6,6 +6,8 @@ public record ServiceOfferingResponse(
         String description,
         String categoryName,
         Long categoryId,
-        String formTemplate,
+        Long departmentId,
+        String departmentName,
+        String fieldSchema,
         boolean isActive
 ) {}

@@ -44,10 +44,12 @@ public class ServiceController {
     public ResponseEntity<Page<ServiceOfferingResponse>> getAllServices(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "departmentId", required = false) Long departmentId,
             @RequestParam(value = "isActive", required = false) Boolean isActive,
-            @RequestParam("page") @Min(value = 1) Integer page, @RequestParam("size") Integer size
+            @RequestParam("page") @Min(value = 1) Integer page,
+            @RequestParam("size") Integer size
     ) {
-        return ResponseEntity.ok(managerService.getAllServices(name, categoryId, isActive, PageRequest.of(page - 1, size)));
+        return ResponseEntity.ok(managerService.getAllServices(name, categoryId, departmentId, isActive, PageRequest.of(page - 1, size)));
     }
 
     @Operation(summary = "Create a new service", description = "Allows a manager to define a new service")

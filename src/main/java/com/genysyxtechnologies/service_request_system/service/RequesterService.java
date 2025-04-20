@@ -13,9 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface RequesterService {
-    Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Pageable pageable);
+    Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Long departmentId, Pageable pageable);
     List<CategoryResponse> getCategories();
     ServiceOfferingResponse getServiceForRequestForm(Long serviceId);
-    ServiceRequest submitRequest(Long serviceId, String requestData, MultipartFile attachment);
+    ServiceRequest submitRequest(Long serviceId, String requestData, Long userDepartmentId, Long targetDepartmentId, MultipartFile attachment);
     Page<ServiceRequestResponse> getUserRequests(ServiceRequestStatus status, String search, Pageable pageable);
 }

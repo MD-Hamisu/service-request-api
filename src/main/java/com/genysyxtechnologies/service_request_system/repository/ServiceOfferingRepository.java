@@ -8,33 +8,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering, Long> {
-    // Service Query for Requesters
-    @Query(value = "SELECT * FROM services so " +
-        "WHERE so.is_active = true " +
-        "AND (:name IS NULL OR LOWER(so.name::text) LIKE LOWER(CONCAT('%', COALESCE(:name, ''), '%'))) " +
-        "AND (:categoryId IS NULL OR so.category_id = :categoryId) " +
-        "ORDER BY so.created DESC",
-        nativeQuery = true)
-    Page<ServiceOffering> findAvailableServices(
-        @Param("name") String name,
-        @Param("categoryId") Long categoryId,
-        Pageable pageable
-    );
-
-
-    // Service Query For Managers
-    @Query(value = "SELECT * FROM services so " +
-        "WHERE (:name IS NULL OR LOWER(so.name::text) LIKE LOWER(CONCAT('%', COALESCE(:name,''), '%'))) " +
-        "AND (:categoryId IS NULL OR so.category_id = :categoryId) " +
-        "AND (:isActive IS NULL OR so.is_active = :isActive) " +
-        "ORDER BY so.created DESC",
-        nativeQuery = true
-    )
+    @Query("SELECT s FROM ServiceOffering s WHERE " +
+            "(:name IS NULL OR s.name LIKE %:name%) AND " +
+            "(:categoryId IS NULL OR s.category.id = :categoryId) AND " +
+            "(:departmentId IS NULL OR s.department.id = :departmentId) AND " +
+            "(:isActive IS NULL OR s.isActive = :isActive)")
     Page<ServiceOffering> findServicesWithFilters(
             @Param("name") String name,
             @Param("categoryId") Long categoryId,
+            @Param("departmentId") Long departmentId,
             @Param("isActive") Boolean isActive,
             Pageable pageable
     );
 
+    default Page<ServiceOffering> findAvailableServices(String name, Long categoryId, Long departmentId, Pageable pageable) {
+        return findServicesWithFilters(name, categoryId, departmentId, true, pageable);
+    }
 }

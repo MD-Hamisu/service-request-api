@@ -2,7 +2,10 @@ package com.genysyxtechnologies.service_request_system.controller;
 
 import java.util.List;
 
+import com.genysyxtechnologies.service_request_system.dtos.response.SupervisorServiceRequestDTO;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +68,7 @@ public class ServiceRequestController {
             @PathVariable Long id,
             @RequestBody UpdateStatusDto dto
     ) {
-        return ResponseEntity.ok(managerService.updateRequestStatus(id, dto.status()));
+        return ResponseEntity.ok(managerService.updateRequestStatus(id, dto));
     }
 
     @Operation(summary = "Get all request statuses", description = "Retrieves a list of all possible request statuses")
@@ -73,5 +76,24 @@ public class ServiceRequestController {
     @GetMapping("/statuses")
         public ResponseEntity<List<String>> getAllRequestStatuses() {
         return ResponseEntity.ok(managerService.getAllRequestStatuses());
+    }
+
+    @Operation(summary = "Get all service requests for supervisor",
+            description = "Retrieves a paginated list of all service requests, filterable by user department and/or target department. Page numbers are 1-based (e.g., page=1 for the first page).")
+    @ApiResponse(responseCode = "200", description = "List of service requests retrieved successfully")
+    @ApiResponse(responseCode = "403", description = "Access denied (Supervisor role required)")
+    @ApiResponse(responseCode = "404", description = "Department not found")
+    @GetMapping("/supervisor")
+    @PreAuthorize("hasRole('SUPERVISOR')")
+    public ResponseEntity<Page<SupervisorServiceRequestDTO>> getAllRequests(
+            @RequestParam(value = "userDepartmentId", required = false) Long userDepartmentId,
+            @RequestParam(value = "targetDepartmentId", required = false) Long targetDepartmentId,
+            @RequestParam(value = "serviceRequestStatus", required = false) ServiceRequestStatus serviceRequestStatus,
+            @RequestParam(value = "page", defaultValue = "1") @Min(value = 1) Integer page,
+            @RequestParam(value = "size", defaultValue = "10") @Min(value = 1) Integer size
+    ) {
+        Page<SupervisorServiceRequestDTO> requests = managerService.getRequestsForSupervisor(
+                userDepartmentId, targetDepartmentId, serviceRequestStatus, PageRequest.of(page - 1, size));
+        return ResponseEntity.ok(requests);
     }
 }

@@ -89,7 +89,6 @@ public class RequesterController {
                 serviceId,
                 requestDTO.requestData(),
                 requestDTO.userDepartmentId(),
-                requestDTO.targetDepartmentId(),
                 null
         ));
     }

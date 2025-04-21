@@ -9,10 +9,12 @@ import java.util.stream.Collectors;
 
 import com.genysyxtechnologies.service_request_system.model.Department;
 import com.genysyxtechnologies.service_request_system.repository.DepartmentRepository;
+import com.genysyxtechnologies.service_request_system.service.NotificationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RequesterServiceImpl implements RequesterService {
 
     private final ServiceOfferingRepository serviceOfferingRepository;
@@ -47,6 +50,7 @@ public class RequesterServiceImpl implements RequesterService {
     private final ObjectMapper jacksonObjectMapper;
     private final CategoryRepository categoryRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     @Override
     public Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Long departmentId, Pageable pageable) {
@@ -94,12 +98,12 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getDepartment().getId(),
                 service.getDepartment().getName(),
                 service.getFieldSchema(),
-                service.isActive()
+                true
         );
     }
 
     @Override
-    public ServiceRequest submitRequest(Long serviceId, String requestData, Long userDepartmentId, Long targetDepartmentId, MultipartFile attachment) {
+    public ServiceRequest submitRequest(Long serviceId, String requestData, Long userDepartmentId, MultipartFile attachment) {
         ServiceOffering service = serviceOfferingRepository.findById(serviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
         if (!service.isActive()) {
@@ -108,15 +112,11 @@ public class RequesterServiceImpl implements RequesterService {
 
         User user = securityUtil.getCurrentUser();
 
+        // validate and get the user and target departments
         Department userDepartment = departmentRepository.findById(userDepartmentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User department not found"));
 
-        Department targetDepartment = departmentRepository.findById(targetDepartmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target department not found"));
-
-        if (!targetDepartment.getId().equals(service.getDepartment().getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Target department does not match the service's department");
-        }
+        Department targetDepartment = service.getDepartment(); // get the target department from the service
 
         validateRequestData(service.getFieldSchema(), requestData);
 
@@ -138,12 +138,13 @@ public class RequesterServiceImpl implements RequesterService {
         request.setUserDepartment(userDepartment);
         request.setTargetDepartment(targetDepartment);
         request.setStatus(ServiceRequestStatus.PENDING);
-        request.setSubmissionDate(LocalDateTime.now());
         request.setSubmittedData(requestData);
         request.setAttachmentUrl(attachmentUrl);
-        serviceRequestRepository.save(request);
+        request = serviceRequestRepository.save(request);
 
         emailService.sendRequestSubmissionEmail(user, request);
+        // Trigger a notification
+        notificationService.createNotification(request.getId(), user.getId(), request.getStatus());
 
         return request;
     }
@@ -180,10 +181,11 @@ public class RequesterServiceImpl implements RequesterService {
                 request.getUser().getFullName(),
                 request.getUserDepartment().getName(),
                 request.getTargetDepartment().getName(),
-                request.getSubmissionDate().toString(),
+                request.getSubmissionDate(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),
-                request.getAttachmentUrl()
+                request.getAttachmentUrl(),
+                request.getRejectionReason()
         ));
     }
 }

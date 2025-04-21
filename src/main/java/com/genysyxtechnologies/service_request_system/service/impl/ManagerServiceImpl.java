@@ -4,21 +4,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.genysyxtechnologies.service_request_system.dtos.request.UpdateStatusDto;
+import com.genysyxtechnologies.service_request_system.dtos.response.*;
 import com.genysyxtechnologies.service_request_system.model.Department;
 import com.genysyxtechnologies.service_request_system.repository.DepartmentRepository;
+import com.genysyxtechnologies.service_request_system.service.NotificationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
 import com.genysyxtechnologies.service_request_system.dtos.request.CategoryDTO;
 import com.genysyxtechnologies.service_request_system.dtos.request.ServiceOfferingDTO;
-import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.DashboardResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
 import com.genysyxtechnologies.service_request_system.model.Category;
 import com.genysyxtechnologies.service_request_system.model.ServiceOffering;
 import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ManagerServiceImpl implements ManagerService {
 
     private final ServiceOfferingRepository serviceOfferingRepository;
@@ -40,14 +41,17 @@ public class ManagerServiceImpl implements ManagerService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final DepartmentRepository departmentRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     @Override
     public DashboardResponse getDashboardStats() {
         long totalRequests = serviceRequestRepository.count();
         long pending = serviceRequestRepository.countByStatus(ServiceRequestStatus.PENDING);
         long inProgress = serviceRequestRepository.countByStatus(ServiceRequestStatus.IN_PROGRESS);
+        long underReview = serviceRequestRepository.countByStatus(ServiceRequestStatus.UNDER_REVIEW);
+        long rejected = serviceRequestRepository.countByStatus(ServiceRequestStatus.REJECTED);
         long completed = serviceRequestRepository.countByStatus(ServiceRequestStatus.COMPLETED);
-        return new DashboardResponse(totalRequests, pending, inProgress, completed);
+        return new DashboardResponse(totalRequests, pending, underReview, rejected, inProgress, completed);
     }
 
     @Override
@@ -154,10 +158,11 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getUser().getUsername(),
                 request.getUserDepartment().getName(),
                 request.getTargetDepartment().getName(),
-                request.getSubmissionDate().toString(),
+                request.getSubmissionDate(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),
-                request.getAttachmentUrl()
+                request.getAttachmentUrl(),
+                request.getRejectionReason()
         ));
     }
 
@@ -171,23 +176,32 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getUser().getUsername(),
                 request.getUserDepartment().getName(),
                 request.getTargetDepartment().getName(),
-                request.getSubmissionDate().toString(),
+                request.getSubmissionDate(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),
-                request.getAttachmentUrl()
+                request.getAttachmentUrl(),
+                request.getRejectionReason()
         );
     }
 
     @Override
-    public ServiceRequestResponse updateRequestStatus(Long id, ServiceRequestStatus status) {
+    public ServiceRequestResponse updateRequestStatus(Long id, UpdateStatusDto updateStatusDto) {
         ServiceRequest request = serviceRequestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found"));
 
-        if (!request.getStatus().equals(status)) {
-            request.setStatus(status);
+        // validate reason if status is rejected
+        if(updateStatusDto.status().equals(ServiceRequestStatus.REJECTED) && updateStatusDto.rejectionReason() == null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rejection reason cannot be null");
+        }
+
+        if (!request.getStatus().equals(updateStatusDto.status())) {
+            request.setStatus(updateStatusDto.status());
+            request.setRejectionReason(updateStatusDto.rejectionReason());
             ServiceRequest updatedRequest = serviceRequestRepository.save(request);
 
             emailService.sendRequestStatusChangeEmail(updatedRequest.getUser(), updatedRequest);
+            // Trigger a notification
+            notificationService.createNotification(request.getId(), request.getUser().getId(), updateStatusDto.status());
 
             return new ServiceRequestResponse(
                     updatedRequest.getId(),
@@ -195,10 +209,11 @@ public class ManagerServiceImpl implements ManagerService {
                     updatedRequest.getUser().getUsername(),
                     updatedRequest.getUserDepartment().getName(),
                     updatedRequest.getTargetDepartment().getName(),
-                    updatedRequest.getSubmissionDate().toString(),
+                    updatedRequest.getSubmissionDate(),
                     updatedRequest.getStatus().toString(),
                     updatedRequest.getSubmittedData(),
-                    updatedRequest.getAttachmentUrl()
+                    updatedRequest.getAttachmentUrl(),
+                    updatedRequest.getRejectionReason()
             );
         }
 
@@ -208,10 +223,11 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getUser().getUsername(),
                 request.getUserDepartment().getName(),
                 request.getTargetDepartment().getName(),
-                request.getSubmissionDate().toString(),
+                request.getSubmissionDate(),
                 request.getStatus().toString(),
                 request.getSubmittedData(),
-                request.getAttachmentUrl()
+                request.getAttachmentUrl(),
+                request.getRejectionReason()
         );
     }
 
@@ -220,6 +236,47 @@ public class ManagerServiceImpl implements ManagerService {
         return Arrays.stream(ServiceRequestStatus.values())
                 .map(Enum::name)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves service requests for a supervisor, with optional filtering by userDepartment and/or targetDepartment.
+     *
+     * @param userDepartmentId   the ID of the user department to filter by (optional, null to ignore)
+     * @param targetDepartmentId the ID of the target department to filter by (optional, null to ignore)
+     * @param status the status of the service request (optional, null to ignore)
+     * @param pageable           pagination information
+     * @return a page of SupervisorRequestDTOs
+     */
+    @Override
+    public Page<SupervisorServiceRequestDTO> getRequestsForSupervisor(Long userDepartmentId,
+                                                                      Long targetDepartmentId,
+                                                                      ServiceRequestStatus status,
+                                                                      Pageable pageable) {
+
+        // Validate department IDs if provided
+        if (userDepartmentId != null) {
+            departmentRepository.findById(userDepartmentId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User department not found"));
+        }
+        if (targetDepartmentId != null) {
+            departmentRepository.findById(targetDepartmentId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Target department not found"));
+        }
+
+        // Use the Specification to filter requests
+        var specification = ServiceRequestSpecification.withSupervisorFilters(userDepartmentId, targetDepartmentId, status);
+
+        // Fetch requests using the specification
+        Page<ServiceRequest> requests = serviceRequestRepository.findAll(specification, pageable);
+
+        // Map to DTO
+        return requests.map(request -> new SupervisorServiceRequestDTO(
+                request.getId(),
+                request.getSubmissionDate(),
+                request.getStatus(),
+                request.getUserDepartment().getName(),
+                request.getTargetDepartment().getName()
+        ));
     }
 
     private void mapToServiceOfferingEntity(ServiceOfferingDTO dto, ServiceOffering serviceOffering) {
@@ -238,4 +295,5 @@ public class ManagerServiceImpl implements ManagerService {
         serviceOffering.setFieldSchema(dto.fields());
         serviceOffering.setActive(dto.isActive());
     }
+
 }

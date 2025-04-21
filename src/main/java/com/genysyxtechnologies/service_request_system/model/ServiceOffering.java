@@ -34,7 +34,7 @@ public class ServiceOffering {
      * JSON string defining the structure of custom fields required for requests of this service.
      * Example: {"issueType": "dropdown", "description": "text"}
      */
-    @Column(name = "field_schema", columnDefinition = "jsonb", nullable = false)
+    @Column(name = "field_schema", nullable = false)
     @JdbcTypeCode(SqlTypes.JSON)
     private String fieldSchema; // JSON string for custom fields
 

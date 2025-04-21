@@ -2,16 +2,14 @@ package com.genysyxtechnologies.service_request_system.service;
 
 import java.util.List;
 
+import com.genysyxtechnologies.service_request_system.dtos.request.UpdateStatusDto;
+import com.genysyxtechnologies.service_request_system.dtos.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
 import com.genysyxtechnologies.service_request_system.dtos.request.CategoryDTO;
 import com.genysyxtechnologies.service_request_system.dtos.request.ServiceOfferingDTO;
-import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.DashboardResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
 
 public interface ManagerService {
     DashboardResponse getDashboardStats();
@@ -24,6 +22,10 @@ public interface ManagerService {
     CategoryResponse updateCategory(Long id, CategoryDTO categoryDTO);
     Page<ServiceRequestResponse> getAllRequests(ServiceRequestStatus status, String search, Pageable pageable);
     ServiceRequestResponse getRequestDetails(Long id);
-    ServiceRequestResponse updateRequestStatus(Long id, ServiceRequestStatus status);
+    ServiceRequestResponse updateRequestStatus(Long id, UpdateStatusDto dto);
     List<String> getAllRequestStatuses();
+    Page<SupervisorServiceRequestDTO> getRequestsForSupervisor(Long userDepartmentId,
+                                                               Long targetDepartmentId,
+                                                               ServiceRequestStatus status,
+                                                               Pageable pageable);
 }

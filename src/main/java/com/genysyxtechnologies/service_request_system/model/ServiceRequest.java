@@ -33,11 +33,14 @@ public class ServiceRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ServiceRequestStatus status = ServiceRequestStatus.PENDING; // Default value
+    private ServiceRequestStatus status;
 
     @Column(name = "submission_date", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime submissionDate;
+
+    @Column
+    private String rejectionReason; // can be null
 
     /**
      * JSON string containing the actual data submitted by the requester, conforming to the
@@ -47,4 +50,14 @@ public class ServiceRequest {
     private String submittedData; // JSON string for submitted data
 
     private String attachmentUrl;
+
+    @PrePersist
+    protected void onCreate() {
+        if (status == null) {
+            status = ServiceRequestStatus.PENDING;
+        }
+        if (submissionDate == null) {
+            submissionDate = LocalDateTime.now();
+        }
+    }
 }

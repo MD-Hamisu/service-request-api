@@ -29,6 +29,10 @@ public class ServiceRequestSpecification {
                         "%" + searchTerm.toLowerCase() + "%"
                 );
 
+                // Add sorting by submissionDate (descending)
+                assert query != null;
+                query.orderBy(criteriaBuilder.desc(root.get("submissionDate")));
+
                 predicates.add(criteriaBuilder.or(serviceNamePredicate, usernamePredicate));
             }
 
@@ -56,6 +60,35 @@ public class ServiceRequestSpecification {
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    /**
+     * Creates a Specification for filtering service requests by user department and/or target department.
+     *
+     * @param userDepartmentId   the ID of the user department to filter by (optional, null to ignore)
+     * @param targetDepartmentId the ID of the target department to filter by (optional, null to ignore)
+     * @return a Specification for ServiceRequest
+     */
+    public static Specification<ServiceRequest> withSupervisorFilters(Long userDepartmentId,
+                                                                      Long targetDepartmentId,
+                                                                      ServiceRequestStatus status) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (userDepartmentId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("userDepartment").get("id"), userDepartmentId));
+            }
+
+            if (targetDepartmentId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("targetDepartment").get("id"), targetDepartmentId));
+            }
+
+            if (status != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
 }

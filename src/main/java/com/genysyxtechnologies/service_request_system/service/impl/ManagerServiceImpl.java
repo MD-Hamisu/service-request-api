@@ -66,7 +66,6 @@ public class ManagerServiceImpl implements ManagerService {
                 service.getCategory().getId(),
                 service.getDepartment().getId(),
                 service.getDepartment().getName(),
-                service.getFieldSchema(),
                 service.isActive()
         ));
     }
@@ -84,7 +83,6 @@ public class ManagerServiceImpl implements ManagerService {
                 savedService.getCategory().getId(),
                 savedService.getDepartment().getId(),
                 savedService.getDepartment().getName(),
-                savedService.getFieldSchema(),
                 savedService.isActive()
         );
     }
@@ -103,7 +101,6 @@ public class ManagerServiceImpl implements ManagerService {
                 updatedService.getCategory().getId(),
                 updatedService.getDepartment().getId(),
                 updatedService.getDepartment().getName(),
-                updatedService.getFieldSchema(),
                 updatedService.isActive()
         );
     }
@@ -160,7 +157,7 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getTargetDepartment().getName(),
                 request.getSubmissionDate(),
                 request.getStatus().toString(),
-                request.getSubmittedData(),
+                request.getDescription(),
                 request.getAttachmentUrl(),
                 request.getRejectionReason()
         ));
@@ -178,7 +175,7 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getTargetDepartment().getName(),
                 request.getSubmissionDate(),
                 request.getStatus().toString(),
-                request.getSubmittedData(),
+                request.getDescription(),
                 request.getAttachmentUrl(),
                 request.getRejectionReason()
         );
@@ -211,7 +208,7 @@ public class ManagerServiceImpl implements ManagerService {
                     updatedRequest.getTargetDepartment().getName(),
                     updatedRequest.getSubmissionDate(),
                     updatedRequest.getStatus().toString(),
-                    updatedRequest.getSubmittedData(),
+                    updatedRequest.getDescription(),
                     updatedRequest.getAttachmentUrl(),
                     updatedRequest.getRejectionReason()
             );
@@ -225,7 +222,7 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getTargetDepartment().getName(),
                 request.getSubmissionDate(),
                 request.getStatus().toString(),
-                request.getSubmittedData(),
+                request.getDescription(),
                 request.getAttachmentUrl(),
                 request.getRejectionReason()
         );
@@ -292,7 +289,6 @@ public class ManagerServiceImpl implements ManagerService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
             serviceOffering.setDepartment(department);
         }
-        serviceOffering.setFieldSchema(dto.fields());
         serviceOffering.setActive(dto.isActive());
     }
 

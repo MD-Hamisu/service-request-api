@@ -16,6 +16,6 @@ public interface RequesterService {
     Page<ServiceOfferingResponse> getAvailableServices(String name, Long categoryId, Long departmentId, Pageable pageable);
     List<CategoryResponse> getCategories();
     ServiceOfferingResponse getServiceForRequestForm(Long serviceId);
-    ServiceRequest submitRequest(Long serviceId, String requestData, Long userDepartmentId, MultipartFile attachment);
+    ServiceRequest submitRequest(Long serviceId, String description, Long userDepartmentId, MultipartFile attachment);
     Page<ServiceRequestResponse> getUserRequests(ServiceRequestStatus status, String search, Pageable pageable);
 }

@@ -1,15 +1,23 @@
 package com.genysyxtechnologies.service_request_system.service.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
+import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
+import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
+import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
 import com.genysyxtechnologies.service_request_system.model.Department;
+import com.genysyxtechnologies.service_request_system.model.ServiceOffering;
+import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
+import com.genysyxtechnologies.service_request_system.model.User;
+import com.genysyxtechnologies.service_request_system.repository.CategoryRepository;
 import com.genysyxtechnologies.service_request_system.repository.DepartmentRepository;
+import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
+import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
+import com.genysyxtechnologies.service_request_system.repository.specification.ServiceRequestSpecification;
+import com.genysyxtechnologies.service_request_system.service.EmailService;
 import com.genysyxtechnologies.service_request_system.service.NotificationService;
+import com.genysyxtechnologies.service_request_system.service.RequesterService;
+import com.genysyxtechnologies.service_request_system.service.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -18,25 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
-import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
-import com.genysyxtechnologies.service_request_system.model.ServiceOffering;
-import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
-import com.genysyxtechnologies.service_request_system.model.User;
-import com.genysyxtechnologies.service_request_system.repository.CategoryRepository;
-import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
-import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
-import com.genysyxtechnologies.service_request_system.repository.specification.ServiceRequestSpecification;
-import com.genysyxtechnologies.service_request_system.service.EmailService;
-import com.genysyxtechnologies.service_request_system.service.RequesterService;
-import com.genysyxtechnologies.service_request_system.service.util.SecurityUtil;
-
-import lombok.RequiredArgsConstructor;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +40,6 @@ public class RequesterServiceImpl implements RequesterService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final DepartmentRepository departmentRepository;
     private final SecurityUtil securityUtil;
-    private final ObjectMapper jacksonObjectMapper;
     private final CategoryRepository categoryRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
@@ -64,7 +56,6 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getCategory().getId(),
                 service.getDepartment().getId(),
                 service.getDepartment().getName(),
-                service.getFieldSchema(),
                 service.isActive()
         ));
     }
@@ -97,13 +88,12 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getCategory().getId(),
                 service.getDepartment().getId(),
                 service.getDepartment().getName(),
-                service.getFieldSchema(),
                 true
         );
     }
 
     @Override
-    public ServiceRequest submitRequest(Long serviceId, String requestData, Long userDepartmentId, MultipartFile attachment) {
+    public ServiceRequest submitRequest(Long serviceId, String description, Long userDepartmentId, MultipartFile attachment) {
         ServiceOffering service = serviceOfferingRepository.findById(serviceId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
         if (!service.isActive()) {
@@ -117,8 +107,6 @@ public class RequesterServiceImpl implements RequesterService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User department not found"));
 
         Department targetDepartment = service.getDepartment(); // get the target department from the service
-
-        validateRequestData(service.getFieldSchema(), requestData);
 
         String attachmentUrl = null;
         if (attachment != null && !attachment.isEmpty()) {
@@ -138,7 +126,7 @@ public class RequesterServiceImpl implements RequesterService {
         request.setUserDepartment(userDepartment);
         request.setTargetDepartment(targetDepartment);
         request.setStatus(ServiceRequestStatus.PENDING);
-        request.setSubmittedData(requestData);
+        request.setDescription(description);
         request.setAttachmentUrl(attachmentUrl);
         request = serviceRequestRepository.save(request);
 
@@ -147,23 +135,6 @@ public class RequesterServiceImpl implements RequesterService {
         notificationService.createNotification(request.getId(), user.getId(), request.getStatus());
 
         return request;
-    }
-
-    private void validateRequestData(String formTemplate, String requestData) {
-        try {
-            JsonNode templateNode = jacksonObjectMapper.readTree(formTemplate);
-            JsonNode dataNode = jacksonObjectMapper.readTree(requestData);
-
-            for (Iterator<String> it = dataNode.fieldNames(); it.hasNext(); ) {
-                String fieldName = it.next();
-                if (!templateNode.has(fieldName)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Unexpected field in request data: " + fieldName);
-                }
-            }
-        } catch (JsonProcessingException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid JSON format: " + e.getMessage());
-        }
     }
 
     @Override
@@ -183,7 +154,7 @@ public class RequesterServiceImpl implements RequesterService {
                 request.getTargetDepartment().getName(),
                 request.getSubmissionDate(),
                 request.getStatus().toString(),
-                request.getSubmittedData(),
+                request.getDescription(),
                 request.getAttachmentUrl(),
                 request.getRejectionReason()
         ));

@@ -30,14 +30,6 @@ public class ServiceOffering {
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    /**
-     * JSON string defining the structure of custom fields required for requests of this service.
-     * Example: {"issueType": "dropdown", "description": "text"}
-     */
-    @Column(name = "field_schema", nullable = false)
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String fieldSchema; // JSON string for custom fields
-
     @Column(name = "is_active")
     private boolean isActive = true;
 

@@ -8,6 +8,5 @@ public record ServiceOfferingResponse(
         Long categoryId,
         Long departmentId,
         String departmentName,
-        String fieldSchema,
         boolean isActive
 ) {}

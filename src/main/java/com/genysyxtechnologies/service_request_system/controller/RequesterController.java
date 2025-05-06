@@ -87,7 +87,7 @@ public class RequesterController {
     ) {
         return ResponseEntity.ok(requesterService.submitRequest(
                 serviceId,
-                requestDTO.requestData(),
+                requestDTO.description(),
                 requestDTO.userDepartmentId(),
                 null
         ));

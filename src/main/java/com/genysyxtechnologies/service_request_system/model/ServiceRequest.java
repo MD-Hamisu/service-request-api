@@ -42,12 +42,8 @@ public class ServiceRequest {
     @Column
     private String rejectionReason; // can be null
 
-    /**
-     * JSON string containing the actual data submitted by the requester, conforming to the
-     * structure defined in the associated ServiceOffering's fieldSchema.
-     */
-    @Column(name = "submitted_data", columnDefinition = "text", nullable = false, length = 10000)
-    private String submittedData; // JSON string for submitted data
+    @Column(length = 10000)
+    private String description;
 
     private String attachmentUrl;
 

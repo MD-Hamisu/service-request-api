@@ -9,6 +9,5 @@ public record ServiceOfferingDTO(
         String description,
         @NotNull(message = "Category ID is required") Long categoryId,
         @NotNull(message = "Department ID is required") Long departmentId,
-        @NotBlank(message = "Field schema is required") String fields,
         boolean isActive
 ) {}

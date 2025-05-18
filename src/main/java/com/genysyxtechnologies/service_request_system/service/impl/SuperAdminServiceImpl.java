@@ -8,11 +8,13 @@ import com.genysyxtechnologies.service_request_system.model.User;
 import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
 import com.genysyxtechnologies.service_request_system.repository.UserRepository;
+import com.genysyxtechnologies.service_request_system.repository.UserSpecification;
 import com.genysyxtechnologies.service_request_system.service.EmailService;
 import com.genysyxtechnologies.service_request_system.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,8 +46,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public Page<UserResponse> getAllManagers(String search, Pageable pageable) {
-        String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
-        Page<User> managers = userRepository.findByRoleWithFilters(Role.MANAGER, searchTerm, pageable);
+        Specification<User> spec = Specification
+            .where(UserSpecification.hasRole(Role.MANAGER))
+            .and(UserSpecification.searchByUsernameOrEmail(search));
+
+        var managers = userRepository.findAll(spec, pageable);
         return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
     }
 
@@ -63,6 +68,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         User manager = new User();
         manager.setUsername(userDTO.username());
         manager.setEmail(userDTO.email());
+        manager.setFirstName(userDTO.firstName());
+        manager.setLastName(userDTO.lastName());
         manager.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD)); // set default password
         manager.setRoles(Set.of(Role.MANAGER));
         User savedManager = userRepository.save(manager);
@@ -115,8 +122,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public Page<UserResponse> getAllRequesters(String search, Pageable pageable) {
-        String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
-        Page<User> requesters = userRepository.findByRoleWithFilters(Role.REQUESTER, searchTerm, pageable);
+        Specification<User> spec = Specification
+            .where(UserSpecification.hasRole(Role.REQUESTER))
+            .and(UserSpecification.searchByUsernameOrEmail(search));
+
+        var requesters = userRepository.findAll(spec, pageable);
         return requesters.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
     }
 }

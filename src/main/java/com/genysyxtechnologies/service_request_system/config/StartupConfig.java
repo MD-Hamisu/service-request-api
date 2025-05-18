@@ -28,7 +28,7 @@ public class StartupConfig {
             superAdmin.setEmail("superadmin@srs.com");
             superAdmin.setFirstName("Super");
             superAdmin.setLastName("Admin");
-            superAdmin.getRoles().addAll(List.of(Role.SUPER_ADMIN, Role.MANAGER));
+            superAdmin.getRoles().addAll(List.of(Role.SUPER_ADMIN, Role.MANAGER, Role.SUPERVISOR));
             repository.save(superAdmin);
         }
     }

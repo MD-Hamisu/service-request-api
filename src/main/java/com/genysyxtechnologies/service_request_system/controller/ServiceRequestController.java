@@ -84,7 +84,6 @@ public class ServiceRequestController {
     @ApiResponse(responseCode = "403", description = "Access denied (Supervisor role required)")
     @ApiResponse(responseCode = "404", description = "Department not found")
     @GetMapping("/supervisor")
-    @PreAuthorize("hasRole('SUPERVISOR')")
     public ResponseEntity<Page<SupervisorServiceRequestDTO>> getAllRequests(
             @RequestParam(value = "userDepartmentId", required = false) Long userDepartmentId,
             @RequestParam(value = "targetDepartmentId", required = false) Long targetDepartmentId,

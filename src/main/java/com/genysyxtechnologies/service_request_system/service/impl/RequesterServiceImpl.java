@@ -64,7 +64,6 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getCategory().getId(),
                 service.getDepartment().getId(),
                 service.getDepartment().getName(),
-                service.getFieldSchema(),
                 service.isActive()
         ));
     }
@@ -97,7 +96,6 @@ public class RequesterServiceImpl implements RequesterService {
                 service.getCategory().getId(),
                 service.getDepartment().getId(),
                 service.getDepartment().getName(),
-                service.getFieldSchema(),
                 true
         );
     }

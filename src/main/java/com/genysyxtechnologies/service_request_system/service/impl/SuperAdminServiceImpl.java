@@ -51,7 +51,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .and(UserSpecification.searchByUsernameOrEmail(search));
 
         var managers = userRepository.findAll(spec, pageable);
-        return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
+        return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName()));
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         // Send email notification to the Manager
         emailService.sendManagerAccountCreatedEmail(savedManager, DEFAULT_PASSWORD);
 
-        return new UserResponse(savedManager.getId(), savedManager.getUsername(), savedManager.getEmail());
+        return new UserResponse(savedManager.getId(), savedManager.getUsername(), savedManager.getEmail(), savedManager.getFirstName(), savedManager.getLastName());
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         // Send email notification to the Manager
         emailService.sendManagerAccountCreatedEmail(manager, DEFAULT_PASSWORD);
 
-        return new UserResponse(updatedManager.getId(), updatedManager.getUsername(), updatedManager.getEmail());
+        return new UserResponse(updatedManager.getId(), updatedManager.getUsername(), updatedManager.getEmail(), updatedManager.getFirstName(), updatedManager.getLastName());
     }
 
     @Override
@@ -127,6 +127,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             .and(UserSpecification.searchByUsernameOrEmail(search));
 
         var requesters = userRepository.findAll(spec, pageable);
-        return requesters.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
+        return requesters.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName()));
     }
 }

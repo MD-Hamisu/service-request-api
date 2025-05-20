@@ -58,7 +58,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @Async
     public void synchronizeDepartments() {
         // Make network call
         var resp = networkRequest.makeRequest(

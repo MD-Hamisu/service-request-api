@@ -176,9 +176,9 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getUser().getUsername(),
                 request.getUserDepartment().getName(),
                 request.getTargetDepartment().getName(),
-                request.getSubmissionDate(),
-                request.getStatus().toString(),
-                request.getDescription(),
+            request.getSubmissionDate(),
+            request.getStatus().toString(),
+                request.getSubmittedData(),
                 request.getAttachmentUrl(),
                 request.getRejectionReason()
         ));
@@ -196,7 +196,7 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getTargetDepartment().getName(),
                 request.getSubmissionDate(),
                 request.getStatus().toString(),
-                request.getDescription(),
+            request.getSubmittedData(),
                 request.getAttachmentUrl(),
                 request.getRejectionReason()
         );
@@ -237,7 +237,7 @@ public class ManagerServiceImpl implements ManagerService {
                     updatedRequest.getTargetDepartment().getName(),
                     updatedRequest.getSubmissionDate(),
                     updatedRequest.getStatus().toString(),
-                    updatedRequest.getDescription(),
+                request.getSubmittedData(),
                     updatedRequest.getAttachmentUrl(),
                     updatedRequest.getRejectionReason()
             );
@@ -251,7 +251,7 @@ public class ManagerServiceImpl implements ManagerService {
                 request.getTargetDepartment().getName(),
                 request.getSubmissionDate(),
                 request.getStatus().toString(),
-                request.getDescription(),
+            request.getSubmittedData(),
                 request.getAttachmentUrl(),
                 request.getRejectionReason()
         );

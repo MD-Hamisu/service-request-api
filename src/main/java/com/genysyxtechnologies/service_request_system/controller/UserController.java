@@ -46,7 +46,7 @@ public class UserController {
         return ResponseEntity.ok(superAdminService.getAllManagers(search, pageable));
     }
 
-    @Operation(summary = "Create a new manager", description = "Allows a super admin to create a new manager")
+    /*@Operation(summary = "Create a new manager", description = "Allows a super admin to create a new manager")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Manager created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
@@ -78,7 +78,7 @@ public class UserController {
         public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
         superAdminService.deleteManager(id);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 
     @Operation(summary = "Get all requesters", description = "Retrieves a paginated list of requesters with search filter")
     @ApiResponse(responseCode = "200", description = "List of requesters retrieved successfully")

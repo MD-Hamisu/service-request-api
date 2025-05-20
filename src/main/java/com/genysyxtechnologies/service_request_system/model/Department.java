@@ -16,4 +16,8 @@ public class Department {
 
     @Column(nullable = false, unique = true)
     private String code;
+
+    @OneToOne
+    @JoinColumn(name = "hod_user_id")
+    private User HODUser;
 }

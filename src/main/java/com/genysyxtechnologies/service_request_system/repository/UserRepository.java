@@ -8,7 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.web.server.CoWebFilterChain;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -18,15 +20,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRolesContaining(Role role);
 
-    @Query(value = "SELECT u.* FROM users u " +
-        "JOIN user_roles ur ON u.id = ur.user_id " +
-        "WHERE ur.role = :role " +
-        "AND (:search IS NULL OR " +
-        "LOWER(u.username::text) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-        "LOWER(u.email::text) LIKE LOWER(CONCAT('%', :search, '%')))", nativeQuery = true)
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r = :role " +
+            "AND (:search IS NULL OR :search = '' OR " +
+            "LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<User> findByRoleWithFilters(
             @Param("role") Role role,
             @Param("search") String search,
             Pageable pageable
     );
+
+    Optional<User> findByRolesContainingAndDepartmentId(Role role, Long departmentId);
 }

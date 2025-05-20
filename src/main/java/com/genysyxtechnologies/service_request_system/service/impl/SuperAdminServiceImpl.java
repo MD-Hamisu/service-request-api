@@ -37,7 +37,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public SuperAdminDashboardResponse getDashboardStats() {
         long totalRequests = serviceRequestRepository.count();
         long totalRequesters = userRepository.countByRolesContaining(Role.REQUESTER);
-        long totalManagers = userRepository.countByRolesContaining(Role.MANAGER);
+        long totalManagers = userRepository.countByRolesContaining(Role.HOD);
         long totalServices = serviceOfferingRepository.count();
         return new SuperAdminDashboardResponse(totalRequests, totalRequesters, totalManagers, totalServices);
     }
@@ -45,11 +45,11 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public Page<UserResponse> getAllManagers(String search, Pageable pageable) {
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
-        Page<User> managers = userRepository.findByRoleWithFilters(Role.MANAGER, searchTerm, pageable);
+        Page<User> managers = userRepository.findByRoleWithFilters(Role.HOD, searchTerm, pageable);
         return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
     }
 
-    @Override
+    /*@Override
     public UserResponse createManager(UserDTO userDTO) {
         // Check if username or email already exists
         if (userRepository.findByUsername(userDTO.username()).isPresent()) {
@@ -111,7 +111,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a Manager");
         }
         userRepository.delete(manager);
-    }
+    }*/
 
     @Override
     public Page<UserResponse> getAllRequesters(String search, Pageable pageable) {

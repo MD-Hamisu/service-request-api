@@ -43,7 +43,18 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponse(jwt, userRepository.findByUsername(request.identifier()).get()));
     }
 
-    @PostMapping("/signup")
+    @Operation(summary = "Synchronize users", description = "Triggers synchronization of users with an external system")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "User synchronization started successfully"),
+            @ApiResponse(responseCode = "500", description = "Synchronization failed due to an error (e.g., network issue)")
+    })
+    @PostMapping("/synchronize")
+    public ResponseEntity<Void> synchronizeUsers() {
+        userService.synchronizeUsers();
+        return ResponseEntity.accepted().build();
+    }
+
+    /*@PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody SignupRequest request) {
         if (userRepository.findByUsername(request.username()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
@@ -57,7 +68,7 @@ public class AuthController {
         user.getRoles().add(Role.REQUESTER); // Auto-assign Requester role
         userRepository.save(user);
         return ResponseEntity.ok("User created successfully");
-    }
+    }*/
 
     @Operation(summary = "Change password", description = "Allows a manager to change their own password")
     @ApiResponses({

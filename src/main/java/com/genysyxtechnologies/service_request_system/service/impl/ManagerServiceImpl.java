@@ -4,11 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.genysyxtechnologies.service_request_system.constant.Role;
 import com.genysyxtechnologies.service_request_system.dtos.request.UpdateStatusDto;
 import com.genysyxtechnologies.service_request_system.dtos.response.*;
-import com.genysyxtechnologies.service_request_system.model.Department;
+import com.genysyxtechnologies.service_request_system.model.*;
 import com.genysyxtechnologies.service_request_system.repository.DepartmentRepository;
 import com.genysyxtechnologies.service_request_system.service.NotificationService;
+import com.genysyxtechnologies.service_request_system.service.util.SecurityUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,9 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
 import com.genysyxtechnologies.service_request_system.dtos.request.CategoryDTO;
 import com.genysyxtechnologies.service_request_system.dtos.request.ServiceOfferingDTO;
-import com.genysyxtechnologies.service_request_system.model.Category;
-import com.genysyxtechnologies.service_request_system.model.ServiceOffering;
-import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
 import com.genysyxtechnologies.service_request_system.repository.CategoryRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
 import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
@@ -42,6 +41,7 @@ public class ManagerServiceImpl implements ManagerService {
     private final DepartmentRepository departmentRepository;
     private final EmailService emailService;
     private final NotificationService notificationService;
+    private final SecurityUtil securityUtil;
 
     @Override
     public DashboardResponse getDashboardStats() {
@@ -72,6 +72,16 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ServiceOfferingResponse createService(ServiceOfferingDTO serviceOfferingDTO) {
+        // validate the department
+        var dept = departmentRepository.findById(serviceOfferingDTO.departmentId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+
+        // Check if the current user is the HOD of the target department
+        User currentUser = securityUtil.getCurrentUser();
+        if (!dept.getHODUser().getId().equals(currentUser.getId()) || !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the HOD of the target department can update the request status");
+        }
+
         ServiceOffering serviceOffering = new ServiceOffering();
         mapToServiceOfferingEntity(serviceOfferingDTO, serviceOffering);
         ServiceOffering savedService = serviceOfferingRepository.save(serviceOffering);
@@ -91,6 +101,17 @@ public class ManagerServiceImpl implements ManagerService {
     public ServiceOfferingResponse updateService(Long id, ServiceOfferingDTO serviceOfferingDTO) {
         ServiceOffering serviceOffering = serviceOfferingRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
+
+        // validate the department
+        var dept = departmentRepository.findById(serviceOfferingDTO.departmentId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+
+        // Check if the current user is the HOD of the target department
+        User currentUser = securityUtil.getCurrentUser();
+        if (!dept.getHODUser().getId().equals(currentUser.getId()) || !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the HOD of the target department can update the request status");
+        }
+
         mapToServiceOfferingEntity(serviceOfferingDTO, serviceOffering);
         ServiceOffering updatedService = serviceOfferingRepository.save(serviceOffering);
         return new ServiceOfferingResponse(
@@ -185,6 +206,14 @@ public class ManagerServiceImpl implements ManagerService {
     public ServiceRequestResponse updateRequestStatus(Long id, UpdateStatusDto updateStatusDto) {
         ServiceRequest request = serviceRequestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Request not found"));
+
+        // Check if the current user is the HOD of the target department
+        User currentUser = securityUtil.getCurrentUser();
+        if (request.getTargetDepartment().getHODUser() == null ||
+                !request.getTargetDepartment().getHODUser().getId().equals(currentUser.getId()) ||
+                !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the HOD of the target department can update the request status");
+        }
 
         // validate reason if status is rejected
         if(updateStatusDto.status().equals(ServiceRequestStatus.REJECTED) && updateStatusDto.rejectionReason() == null){

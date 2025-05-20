@@ -5,4 +5,5 @@ import com.genysyxtechnologies.service_request_system.dtos.request.ChangePasswor
 public interface UserService {
     void changePassword(ChangePasswordRequest request);
     void resetPassword(Long userId);
+    void synchronizeUsers();
 }

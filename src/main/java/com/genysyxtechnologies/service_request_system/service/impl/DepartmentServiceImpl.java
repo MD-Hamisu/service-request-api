@@ -38,14 +38,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<DepartmentResponse> getAllDepartments() {
         return departmentRepository.findAll().stream()
-                .map(dept -> new DepartmentResponse(dept.getId(), dept.getName(), dept.getCode()))
+                .map(dept -> new DepartmentResponse(dept.getId(), dept.getName(), dept.getCode(), dept.getHODUser() != null ? dept.getHODUser().getFullName(): "NO HOD"))
                 .collect(Collectors.toList());
     }
 
     @Override
     public DepartmentResponse getDepartmentById(Long id) {
         return departmentRepository.findById(id)
-                .map(dept -> new DepartmentResponse(dept.getId(), dept.getName(), dept.getCode()))
+                .map(dept -> new DepartmentResponse(dept.getId(), dept.getName(), dept.getCode(), dept.getHODUser() != null ? dept.getHODUser().getFullName(): "NO HOD"))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
     }
 
@@ -53,7 +53,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<DepartmentResponse> findByQuery(String query) {
         return departmentRepository.findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(query, query)
                 .stream()
-                .map(dept -> new DepartmentResponse(dept.getId(), dept.getName(), dept.getCode()))
+                .map(dept -> new DepartmentResponse(dept.getId(), dept.getName(), dept.getCode(), dept.getHODUser() != null ? dept.getHODUser().getFullName(): "NO HOD"))
                 .collect(Collectors.toList());
     }
 

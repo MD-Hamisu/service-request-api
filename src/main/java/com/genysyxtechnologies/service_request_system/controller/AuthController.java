@@ -1,12 +1,9 @@
 package com.genysyxtechnologies.service_request_system.controller;
 
 import com.genysyxtechnologies.service_request_system.config.JwtUtil;
-import com.genysyxtechnologies.service_request_system.constant.Role;
 import com.genysyxtechnologies.service_request_system.dtos.request.ChangePasswordRequest;
 import com.genysyxtechnologies.service_request_system.dtos.security.LoginRequest;
 import com.genysyxtechnologies.service_request_system.dtos.security.LoginResponse;
-import com.genysyxtechnologies.service_request_system.dtos.security.SignupRequest;
-import com.genysyxtechnologies.service_request_system.model.User;
 import com.genysyxtechnologies.service_request_system.repository.UserRepository;
 import com.genysyxtechnologies.service_request_system.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

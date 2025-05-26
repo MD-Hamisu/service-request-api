@@ -1,5 +1,6 @@
 package com.genysyxtechnologies.service_request_system.service.impl;
 
+import com.genysyxtechnologies.service_request_system.constant.Role;
 import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
 import com.genysyxtechnologies.service_request_system.model.User;
 import com.genysyxtechnologies.service_request_system.service.EmailService;
@@ -107,6 +108,25 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
         } catch (MailException e) {
             System.err.println("Failed to send manager account created email to " + manager.getEmail() + ": " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendRoleAssignedEmail(User updatedUser, Role role) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(updatedUser.getEmail());
+        message.setSubject("Service Request System: New Role Assignment");
+        message.setText(
+                "Dear " + updatedUser.getUsername() + ",\n\n" +
+                        "You have been assigned the role of "+role.name()+"\n" +
+                        "You can now be able to perform all operations of "+role.name()+"\n\n" +
+                        "Best regards,\nSRS Team"
+        );
+        try {
+            mailSender.send(message);
+        } catch (MailException e) {
+            System.err.println("Failed to send role update email to " + updatedUser.getEmail() + ": " + e.getMessage());
         }
     }
 }

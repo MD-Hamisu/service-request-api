@@ -1,7 +1,6 @@
 package com.genysyxtechnologies.service_request_system.service.impl;
 
 import com.genysyxtechnologies.service_request_system.constant.Role;
-import com.genysyxtechnologies.service_request_system.dtos.request.UserDTO;
 import com.genysyxtechnologies.service_request_system.dtos.response.SuperAdminDashboardResponse;
 import com.genysyxtechnologies.service_request_system.dtos.response.UserResponse;
 import com.genysyxtechnologies.service_request_system.model.User;
@@ -14,11 +13,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -29,9 +28,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final UserRepository userRepository;
     private final ServiceRequestRepository serviceRequestRepository;
     private final ServiceOfferingRepository serviceOfferingRepository;
-    private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
-    private static final String DEFAULT_PASSWORD = "12345678";
 
     @Override
     public SuperAdminDashboardResponse getDashboardStats() {
@@ -118,5 +115,36 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
         Page<User> requesters = userRepository.findByRoleWithFilters(Role.REQUESTER, searchTerm, pageable);
         return requesters.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName()));
+    }
+
+    @Override
+    public UserResponse assignRole(Long id, Role role) {
+        // Validate role
+        if (role == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role cannot be null");
+        }
+
+        // Find user
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // Update user roles
+        Set<Role> roles = new HashSet<>(user.getRoles());
+        roles.add(role);
+        user.setRoles(roles);
+
+        // Save updated user
+        User updatedUser = userRepository.save(user);
+
+        // Send email notification
+        emailService.sendRoleAssignedEmail(updatedUser, role);
+
+        return new UserResponse(
+                updatedUser.getId(),
+                updatedUser.getUsername(),
+                updatedUser.getEmail(),
+                updatedUser.getFirstName(),
+                updatedUser.getLastName()
+        );
     }
 }

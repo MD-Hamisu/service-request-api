@@ -1,31 +1,26 @@
 package com.genysyxtechnologies.service_request_system.controller;
 
+import com.genysyxtechnologies.service_request_system.constant.Role;
+import com.genysyxtechnologies.service_request_system.dtos.response.UserResponse;
+import com.genysyxtechnologies.service_request_system.service.SuperAdminService;
+import com.genysyxtechnologies.service_request_system.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.genysyxtechnologies.service_request_system.dtos.request.UserDTO;
-import com.genysyxtechnologies.service_request_system.dtos.response.UserResponse;
-import com.genysyxtechnologies.service_request_system.service.SuperAdminService;
-import com.genysyxtechnologies.service_request_system.service.UserService;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -99,5 +94,35 @@ public class UserController {
         public ResponseEntity<String> resetPassword(@PathVariable Long id) {
         userService.resetPassword(id);
         return ResponseEntity.ok("Password reset to 1-8 successfully");
+    }
+
+    @Operation(summary = "Assign role to user", description = "Allows a super admin to assign a role to a user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Role assigned successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid role or request")
+    })
+    @PutMapping("/{id}/assign-role")
+    public ResponseEntity<UserResponse> assignRole(
+            @PathVariable Long id,
+            @RequestParam Role role
+    ) {
+        return ResponseEntity.ok(superAdminService.assignRole(id, role));
+    }
+
+    @Operation(summary = "Get all roles", description = "Returns a list of all possible role values excluding SUPER_ADMIN")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of roles retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(type = "string", example = "REQUESTER, HOD, SUPERVISOR")))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
+    @GetMapping("/roles")
+    public ResponseEntity<List<String>> getAllRoles() {
+        List<String> roles = Arrays.stream(Role.values())
+                .filter(role -> role != Role.SUPER_ADMIN)
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(roles);
     }
 }

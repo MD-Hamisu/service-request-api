@@ -46,7 +46,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public Page<UserResponse> getAllManagers(String search, Pageable pageable) {
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
         Page<User> managers = userRepository.findByRoleWithFilters(Role.HOD, searchTerm, pageable);
-        return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
+        return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName()));
     }
 
     /*@Override
@@ -117,6 +117,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     public Page<UserResponse> getAllRequesters(String search, Pageable pageable) {
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
         Page<User> requesters = userRepository.findByRoleWithFilters(Role.REQUESTER, searchTerm, pageable);
-        return requesters.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail()));
+        return requesters.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName()));
     }
 }

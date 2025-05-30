@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
@@ -27,6 +28,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("search") String search,
             Pageable pageable
     );
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r IN :roles " +
+        "AND (:search IS NULL OR :search = '' OR " +
+        "LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+        "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<User> findByRolesWithFilters(
+        @Param("roles") Set<Role> roles,
+        @Param("search") String search,
+        Pageable pageable
+    );
+
 
     Optional<User> findByRolesContainingAndDepartmentId(Role role, Long departmentId);
 }

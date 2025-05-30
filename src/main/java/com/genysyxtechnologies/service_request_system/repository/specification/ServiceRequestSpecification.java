@@ -10,12 +10,16 @@ import java.util.List;
 
 public class ServiceRequestSpecification {
 
-    public static Specification<ServiceRequest> withFilters(ServiceRequestStatus status, String searchTerm) {
+    public static Specification<ServiceRequest> withFilters(ServiceRequestStatus status, String searchTerm, Long departmentId) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (status != null) {
                 predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+
+            if(departmentId != null) {
+                predicates.add(criteriaBuilder.equal(root.get("service").get("department").get("id"), departmentId));
             }
 
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {

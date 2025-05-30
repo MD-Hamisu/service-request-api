@@ -42,7 +42,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public Page<UserResponse> getAllManagers(String search, Pageable pageable) {
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
-        Page<User> managers = userRepository.findByRoleWithFilters(Role.HOD, searchTerm, pageable);
+        Page<User> managers = userRepository.findByRolesWithFilters(Set.of(Role.HOD, Role.SUPERVISOR), searchTerm, pageable);
         return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName()));
     }
 

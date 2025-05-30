@@ -48,7 +48,7 @@ public class AuthController {
     @PostMapping("/synchronize")
     public ResponseEntity<Void> synchronizeUsers() {
         userService.synchronizeUsers();
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 
     /*@PostMapping("/signup")

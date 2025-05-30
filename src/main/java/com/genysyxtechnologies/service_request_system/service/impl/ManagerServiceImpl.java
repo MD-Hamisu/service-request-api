@@ -29,7 +29,9 @@ import com.genysyxtechnologies.service_request_system.service.EmailService;
 import com.genysyxtechnologies.service_request_system.service.ManagerService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -78,7 +80,7 @@ public class ManagerServiceImpl implements ManagerService {
 
         // Check if the current user is the HOD of the target department
         User currentUser = securityUtil.getCurrentUser();
-        if (!dept.getHODUser().getId().equals(currentUser.getId()) || !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
+        if (!dept.getHODUser().getId().equals(currentUser.getId()) && !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the HOD of the target department can update the request status");
         }
 
@@ -108,7 +110,7 @@ public class ManagerServiceImpl implements ManagerService {
 
         // Check if the current user is the HOD of the target department
         User currentUser = securityUtil.getCurrentUser();
-        if (!dept.getHODUser().getId().equals(currentUser.getId()) || !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
+        if (!dept.getHODUser().getId().equals(currentUser.getId()) && !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the HOD of the target department can update the request status");
         }
 
@@ -165,9 +167,15 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public Page<ServiceRequestResponse> getAllRequests(ServiceRequestStatus status, String search, Pageable pageable) {
+        // get current user
+        var currentUser = securityUtil.getCurrentUser();
         String searchTerm = (search != null && !search.trim().isEmpty()) ? search : null;
+        var departId = currentUser.getRoles().contains(Role.SUPER_ADMIN) ? null : currentUser.getDepartment().getId();
+        if(departId != null && !currentUser.getRoles().contains(Role.HOD)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Permission denied");
+        }
         Page<ServiceRequest> requests = serviceRequestRepository.findAll(
-                ServiceRequestSpecification.withFilters(status, searchTerm),
+                ServiceRequestSpecification.withFilters(status, searchTerm, departId),
                 pageable
         );
         return requests.map(request -> new ServiceRequestResponse(
@@ -210,8 +218,9 @@ public class ManagerServiceImpl implements ManagerService {
         // Check if the current user is the HOD of the target department
         User currentUser = securityUtil.getCurrentUser();
         if (request.getTargetDepartment().getHODUser() == null ||
-                !request.getTargetDepartment().getHODUser().getId().equals(currentUser.getId()) ||
-                !currentUser.getRoles().contains(Role.SUPER_ADMIN)) {
+                (!request.getTargetDepartment().getHODUser().getId().equals(currentUser.getId()) &&
+                !currentUser.getRoles().contains(Role.SUPER_ADMIN))) {
+
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the HOD of the target department can update the request status");
         }
 

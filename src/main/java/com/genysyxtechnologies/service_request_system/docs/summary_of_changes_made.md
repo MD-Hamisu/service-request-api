@@ -10,7 +10,6 @@ This document summarizes the changes made to the Service Request System to imple
         - Added `/api/auth/synchronize` endpoint to trigger asynchronous user synchronization.
     - **UserServiceImpl.java**:
         - Added `synchronizeUsers` method to fetch user data from `URLConstants.GET_USERS` (mapped to `/api/external/staffs`).
-        - Processes JSON response to create/update `User` entities with fields: `username`, `email`, `firstName`, `lastName`, `roles`, and `department`.
         - Assigns random temporary passwords for new users and sends reset emails via `EmailService`.
         - Ensures one HOD per department by removing `HOD` role from existing HODs when a new HOD is assigned.
     - **ExternalApiController.java** (Staff Profile System):

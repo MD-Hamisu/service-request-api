@@ -1,0 +1,69 @@
+2025-05-26T19:10:55.966+01:00  INFO 19160 --- [service-request-system] [main] c.g.s.ServiceRequestSystemApplication    : Starting ServiceRequestSystemApplication using Java 21 with PID 19160 (C:\Users\Ezekiel Hamisu\IdeaProjects\service-request-system\build\classes\java\main started by Ezekiel Hamisu in C:\Users\Ezekiel Hamisu\IdeaProjects\service-request-system)
+2025-05-26T19:10:55.969+01:00 DEBUG 19160 --- [service-request-system] [main] c.g.s.ServiceRequestSystemApplication    : Running with Spring Boot v3.4.3, Spring v6.2.3
+2025-05-26T19:10:55.970+01:00  INFO 19160 --- [service-request-system] [main] c.g.s.ServiceRequestSystemApplication    : No active profile set, falling back to 1 default profile: "default"
+2025-05-26T19:10:58.088+01:00  INFO 19160 --- [service-request-system] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-26T19:10:58.206+01:00  INFO 19160 --- [service-request-system] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 106 ms. Found 6 JPA repository interfaces.
+2025-05-26T19:10:59.263+01:00  INFO 19160 --- [service-request-system] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-26T19:10:59.281+01:00  INFO 19160 --- [service-request-system] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-26T19:10:59.281+01:00  INFO 19160 --- [service-request-system] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.36]
+2025-05-26T19:10:59.364+01:00  INFO 19160 --- [service-request-system] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-26T19:10:59.364+01:00  INFO 19160 --- [service-request-system] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3318 ms
+2025-05-26T19:10:59.760+01:00  INFO 19160 --- [service-request-system] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-26T19:10:59.863+01:00  INFO 19160 --- [service-request-system] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.8.Final
+2025-05-26T19:10:59.915+01:00  INFO 19160 --- [service-request-system] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-05-26T19:11:00.343+01:00  INFO 19160 --- [service-request-system] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-26T19:11:00.386+01:00  INFO 19160 --- [service-request-system] [main] com.zaxxer.hikari.HikariDataSource       : SRSHikariPool - Starting...
+2025-05-26T19:11:00.638+01:00  INFO 19160 --- [service-request-system] [main] com.zaxxer.hikari.pool.HikariPool        : SRSHikariPool - Added connection org.postgresql.jdbc.PgConnection@4c7f2fdb
+2025-05-26T19:11:00.640+01:00  INFO 19160 --- [service-request-system] [main] com.zaxxer.hikari.HikariDataSource       : SRSHikariPool - Start completed.
+2025-05-26T19:11:00.715+01:00  WARN 19160 --- [service-request-system] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-26T19:11:00.738+01:00  INFO 19160 --- [service-request-system] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (SRSHikariPool)']
+	Database driver: undefined/unknown
+	Database version: 16.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-26T19:11:02.325+01:00  INFO 19160 --- [service-request-system] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-26T19:11:02.562+01:00  INFO 19160 --- [service-request-system] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-26T19:11:02.935+01:00  INFO 19160 --- [service-request-system] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-05-26T19:11:04.588+01:00 DEBUG 19160 --- [service-request-system] [main] c.g.s.config.JwtFilter                   : Filter 'jwtFilter' configured for use
+2025-05-26T19:11:04.745+01:00  INFO 19160 --- [service-request-system] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-05-26T19:11:04.746+01:00  WARN 19160 --- [service-request-system] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-05-26T19:11:05.464+01:00  WARN 19160 --- [service-request-system] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-26T19:11:06.048+01:00  INFO 19160 --- [service-request-system] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoints beneath base path '/actuator'
+2025-05-26T19:11:07.081+01:00  INFO 19160 --- [service-request-system] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-05-26T19:11:07.097+01:00  INFO 19160 --- [service-request-system] [main] c.g.s.ServiceRequestSystemApplication    : Started ServiceRequestSystemApplication in 12.331 seconds (process running for 13.759)
+2025-05-26T19:11:07.190+01:00 DEBUG 19160 --- [service-request-system] [main] org.hibernate.SQL                        : 
+    select
+        u1_0.id,
+        u1_0.account_non_expired,
+        u1_0.account_non_locked,
+        u1_0.created_at,
+        u1_0.credentials_non_expired,
+        u1_0.department_id,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.first_name,
+        u1_0.last_name,
+        u1_0.password,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0
+2025-05-26T19:11:07.240+01:00 DEBUG 19160 --- [service-request-system] [main] org.hibernate.SQL                        : 
+    select
+        r1_0.user_id,
+        r1_0.role 
+    from
+        user_roles r1_0 
+    where
+        r1_0.user_id=?
+2025-05-26T19:11:07.740+01:00  INFO 19160 --- [service-request-system] [RMI TCP Connection(2)-192.168.138.196] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-26T19:11:07.740+01:00  INFO 19160 --- [service-request-system] [RMI TCP Connection(2)-192.168.138.196] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-26T19:11:07.742+01:00  INFO 19160 --- [service-request-system] [RMI TCP Connection(2)-192.168.138.196] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-05-26T19:11:19.402+01:00  INFO 19160 --- [service-request-system] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-26T19:11:19.407+01:00  INFO 19160 --- [service-request-system] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-05-26T19:11:19.414+01:00  INFO 19160 --- [service-request-system] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-26T19:11:19.417+01:00  INFO 19160 --- [service-request-system] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : SRSHikariPool - Shutdown initiated...
+2025-05-26T19:11:19.419+01:00  INFO 19160 --- [service-request-system] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : SRSHikariPool - Shutdown completed.

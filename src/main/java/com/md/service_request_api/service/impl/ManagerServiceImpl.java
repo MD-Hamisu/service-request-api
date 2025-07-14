@@ -1,20 +1,23 @@
 package com.md.service_request_api.service.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.md.service_request_api.constant.Role;
-import com.md.service_request_api.dtos.request.UpdateStatusDto;
-import com.genysyxtechnologies.service_request_system.dtos.response.*;
-import com.genysyxtechnologies.service_request_system.model.*;
-import com.md.service_request_api.dtos.response.*;
-import com.md.service_request_api.repository.DepartmentRepository;
-import com.md.service_request_api.service.NotificationService;
-import com.md.service_request_api.service.util.SecurityUtil;
+import com.md.service_request_api.constant.ServiceRequestStatus;
 import com.md.service_request_api.dtos.request.CategoryDTO;
 import com.md.service_request_api.dtos.request.ServiceOfferingDTO;
+import com.md.service_request_api.dtos.request.UpdateStatusDto;
+import com.md.service_request_api.dtos.response.*;
 import com.md.service_request_api.model.*;
+import com.md.service_request_api.repository.CategoryRepository;
+import com.md.service_request_api.repository.DepartmentRepository;
+import com.md.service_request_api.repository.ServiceOfferingRepository;
+import com.md.service_request_api.repository.ServiceRequestRepository;
+import com.md.service_request_api.repository.specification.ServiceRequestSpecification;
+import com.md.service_request_api.service.EmailService;
+import com.md.service_request_api.service.ManagerService;
+import com.md.service_request_api.service.NotificationService;
+import com.md.service_request_api.service.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,16 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.md.service_request_api.constant.ServiceRequestStatus;
-import com.md.service_request_api.repository.CategoryRepository;
-import com.md.service_request_api.repository.ServiceOfferingRepository;
-import com.md.service_request_api.repository.ServiceRequestRepository;
-import com.md.service_request_api.repository.specification.ServiceRequestSpecification;
-import com.md.service_request_api.service.EmailService;
-import com.md.service_request_api.service.ManagerService;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service

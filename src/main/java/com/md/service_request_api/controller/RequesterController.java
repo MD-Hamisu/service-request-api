@@ -64,7 +64,7 @@ public class RequesterController {
         return ResponseEntity.ok(requesterService.getCategories());
     }
 
-    @Operation(summary = "Get service for request", description = "Retrieves details of a specific service, including 🙂its form template, to render the request form")
+    @Operation(summary = "Get service for request", description = "Retrieves details of a specific service, including its form template, to render the request form")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Service details retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Service not found")

@@ -46,69 +46,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         return managers.map(user -> new UserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName()));
     }
 
-    /*@Override
-    public UserResponse createManager(UserDTO userDTO) {
-        // Check if username or email already exists
-        if (userRepository.findByUsername(userDTO.username()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
-        }
-        if (userRepository.findByEmail(userDTO.email()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
-        }
-
-        // Create new Manager user
-        User manager = new User();
-        manager.setUsername(userDTO.username());
-        manager.setEmail(userDTO.email());
-        manager.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD)); // set default password
-        manager.setRoles(Set.of(Role.MANAGER));
-        User savedManager = userRepository.save(manager);
-
-        // Send email notification to the Manager
-        emailService.sendManagerAccountCreatedEmail(savedManager, DEFAULT_PASSWORD);
-
-        return new UserResponse(savedManager.getId(), savedManager.getUsername(), savedManager.getEmail());
-    }
-
-    @Override
-    public UserResponse updateManager(Long id, UserDTO userDTO) {
-        User manager = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Manager not found"));
-
-        // Ensure the user is a Manager
-        if (!manager.getRoles().contains(Role.MANAGER)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a Manager");
-        }
-
-        // Check for duplicate username or email (excluding the current user)
-        userRepository.findByUsername(userDTO.username())
-                .filter(user -> !user.getId().equals(id))
-                .ifPresent(user -> { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists"); });
-        userRepository.findByEmail(userDTO.email())
-                .filter(user -> !user.getId().equals(id))
-                .ifPresent(user -> { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists"); });
-
-        // Update Manager details
-        manager.setUsername(userDTO.username());
-        manager.setEmail(userDTO.email());
-        manager.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD)); // set default password
-        User updatedManager = userRepository.save(manager);
-
-        // Send email notification to the Manager
-        emailService.sendManagerAccountCreatedEmail(manager, DEFAULT_PASSWORD);
-
-        return new UserResponse(updatedManager.getId(), updatedManager.getUsername(), updatedManager.getEmail());
-    }
-
-    @Override
-    public void deleteManager(Long id) {
-        User manager = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Manager not found"));
-        if (!manager.getRoles().contains(Role.MANAGER)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not a Manager");
-        }
-        userRepository.delete(manager);
-    }*/
 
     @Override
     public Page<UserResponse> getAllRequesters(String search, Pageable pageable) {

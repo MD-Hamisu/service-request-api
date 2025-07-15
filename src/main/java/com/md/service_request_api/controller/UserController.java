@@ -41,40 +41,6 @@ public class UserController {
         return ResponseEntity.ok(superAdminService.getAllManagers(search, pageable));
     }
 
-    /*@Operation(summary = "Create a new manager", description = "Allows a super admin to create a new manager")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Manager created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data")
-    })
-    @PostMapping("/managers")
-        public ResponseEntity<UserResponse> createManager(@Valid @RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(superAdminService.createManager(userDTO));
-    }
-
-    @Operation(summary = "Update a manager", description = "Allows a super admin to update a manager's details")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Manager updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Manager not found")
-    })
-    @PutMapping("/managers/{id}")
-        public ResponseEntity<UserResponse> updateManager(
-            @PathVariable Long id,
-            @Valid @RequestBody UserDTO userDTO
-    ) {
-        return ResponseEntity.ok(superAdminService.updateManager(id, userDTO));
-    }
-
-    @Operation(summary = "Delete a manager", description = "Allows a super admin to delete a manager")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Manager deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Manager not found")
-    })
-    @DeleteMapping("/managers/{id}")
-        public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
-        superAdminService.deleteManager(id);
-        return ResponseEntity.noContent().build();
-    }*/
-
     @Operation(summary = "Get all requesters", description = "Retrieves a paginated list of requesters with search filter")
     @ApiResponse(responseCode = "200", description = "List of requesters retrieved successfully")
     @GetMapping("/requesters")

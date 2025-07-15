@@ -146,23 +146,6 @@ public class RequesterServiceImpl implements RequesterService {
         return request;
     }
 
-    private void validateRequestData(String formTemplate, String requestData) {
-        try {
-            JsonNode templateNode = jacksonObjectMapper.readTree(formTemplate);
-            JsonNode dataNode = jacksonObjectMapper.readTree(requestData);
-
-            for (Iterator<String> it = dataNode.fieldNames(); it.hasNext(); ) {
-                String fieldName = it.next();
-                if (!templateNode.has(fieldName)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Unexpected field in request data: " + fieldName);
-                }
-            }
-        } catch (JsonProcessingException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid JSON format: " + e.getMessage());
-        }
-    }
-
     @Override
     public Page<ServiceRequestResponse> getUserRequests(ServiceRequestStatus status, String search, Pageable pageable) {
         User user = securityUtil.getCurrentUser();

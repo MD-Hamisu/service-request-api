@@ -1,9 +1,12 @@
 package com.md.service_request_api.controller;
 
 import com.md.service_request_api.config.JwtUtil;
+import com.md.service_request_api.constant.Role;
 import com.md.service_request_api.dtos.request.ChangePasswordRequest;
 import com.md.service_request_api.dtos.security.LoginRequest;
 import com.md.service_request_api.dtos.security.LoginResponse;
+import com.md.service_request_api.dtos.security.SignupRequest;
+import com.md.service_request_api.model.User;
 import com.md.service_request_api.repository.UserRepository;
 import com.md.service_request_api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +54,8 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    /*@PostMapping("/signup")
+    // could be used in a non-integrated environment where we want to create users and not sync them from another system.
+    @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody SignupRequest request) {
         if (userRepository.findByUsername(request.username()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
@@ -65,7 +69,7 @@ public class AuthController {
         user.getRoles().add(Role.REQUESTER); // Auto-assign Requester role
         userRepository.save(user);
         return ResponseEntity.ok("User created successfully");
-    }*/
+    }
 
     @Operation(summary = "Change password", description = "Allows a manager to change their own password")
     @ApiResponses({

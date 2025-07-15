@@ -145,9 +145,7 @@ public class UserServiceImpl implements UserService {
             if (jsonObject.has("departmentId") && !jsonObject.isNull("departmentId")) {
                 Long departmentId = jsonObject.getLong("departmentId");
                 var dept = Optional.ofNullable(departments.getOrDefault(departmentId, null));
-                dept.ifPresent(department -> {
-                    user.setDepartment(department);
-                });
+                dept.ifPresent(user::setDepartment);
             } else {
                 continue;
             }

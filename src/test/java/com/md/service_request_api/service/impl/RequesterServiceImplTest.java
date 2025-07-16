@@ -1,23 +1,23 @@
 /*
-package com.genysyxtechnologies.service_request_system.service.impl;
+package com.md.service_request_api.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.genysyxtechnologies.service_request_system.constant.Role;
-import com.genysyxtechnologies.service_request_system.constant.ServiceRequestStatus;
-import com.genysyxtechnologies.service_request_system.dtos.response.CategoryResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceOfferingResponse;
-import com.genysyxtechnologies.service_request_system.dtos.response.ServiceRequestResponse;
-import com.genysyxtechnologies.service_request_system.model.Category;
-import com.genysyxtechnologies.service_request_system.model.ServiceOffering;
-import com.genysyxtechnologies.service_request_system.model.ServiceRequest;
-import com.genysyxtechnologies.service_request_system.model.User;
-import com.genysyxtechnologies.service_request_system.repository.CategoryRepository;
-import com.genysyxtechnologies.service_request_system.repository.ServiceOfferingRepository;
-import com.genysyxtechnologies.service_request_system.repository.ServiceRequestRepository;
-import com.genysyxtechnologies.service_request_system.service.EmailService;
-import com.genysyxtechnologies.service_request_system.service.util.SecurityUtil;
+import com.md.service_request_api.constant.Role;
+import com.md.service_request_api.constant.ServiceRequestStatus;
+import com.md.service_request_api.dtos.response.CategoryResponse;
+import com.md.service_request_api.dtos.response.ServiceOfferingResponse;
+import com.md.service_request_api.dtos.response.ServiceRequestResponse;
+import com.md.service_request_api.model.Category;
+import com.md.service_request_api.model.ServiceOffering;
+import com.md.service_request_api.model.ServiceRequest;
+import com.md.service_request_api.model.User;
+import com.md.service_request_api.repository.CategoryRepository;
+import com.md.service_request_api.repository.ServiceOfferingRepository;
+import com.md.service_request_api.repository.ServiceRequestRepository;
+import com.md.service_request_api.service.EmailService;
+import com.md.service_request_api.service.util.SecurityUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -443,4 +443,5 @@ class RequesterServiceImplTest {
         verify(securityUtil).getCurrentUser();
         verify(serviceRequestRepository).findByUserIdWithFilters(user.getId(), ServiceRequestStatus.PENDING, "screen", pageable);
     }
-}*/
+}
+*/

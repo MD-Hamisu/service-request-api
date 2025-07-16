@@ -1,4 +1,4 @@
-package com.genysyxtechnologies.service_request_system;
+package com.md.service_request_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
